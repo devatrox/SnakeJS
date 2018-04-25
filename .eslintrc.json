@@ -1,0 +1,25 @@
+{
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "modules": true
+    }
+  },
+  "extends": "standard",
+  "rules": {
+    "no-unused-vars": "warn",
+    "valid-jsdoc": [
+      "warn",
+      {
+        "requireReturn": false,
+        "requireParamDescription": false,
+        "requireReturnDescription": false
+      }
+    ],
+    "require-jsdoc": "warn"
+  }
+}
