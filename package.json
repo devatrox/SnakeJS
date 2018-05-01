@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "author": "Jason Nickel <mail@jasonnickel.de>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "ajv": "^6.1.1",
     "ajv-keywords": "^3.1.0",
