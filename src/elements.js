@@ -88,14 +88,12 @@ export class Entity extends Point {
     } else {
       let x = this.coord.x + direction.movement[0]
       let y = this.coord.y + direction.movement[1]
-      const screenWidth = Config.view.scaledWidth - 1
-      const screenHeight = Config.view.scaledHeight - 1
 
       // If snake is out of bounds, come out of opposite side
-      if (x < 0) x = screenWidth
-      if (x > screenWidth) x = 0
-      if (y < 0) y = screenHeight
-      if (y > screenHeight) y = 0
+      if (x < 0) x = (this.grid.width - 1)
+      if (x > (this.grid.width - 1)) x = 0
+      if (y < 0) y = (this.grid.height - 1)
+      if (y > (this.grid.height - 1)) y = 0
 
       coord = new Coord(x, y)
     }

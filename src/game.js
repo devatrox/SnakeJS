@@ -13,14 +13,16 @@ export default class Game {
    * @param {Number} [scale=10]
    */
   constructor (width = 640, height = 480, scale = 10) {
+    Utils.assert(width % scale === 0, `width must be a multiple of ${scale}`)
+    Utils.assert(height % scale === 0, `height must be a multiple of ${scale}`)
     /**
      * @type {View}
      */
-    this.view = new View(width, height, scale)
+    this.view = new View(width, height)
     /**
      * @type {Grid}
      */
-    this.grid = new Grid()
+    this.grid = new Grid(scale)
     /**
      * @type {?Number}
      */

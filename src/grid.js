@@ -1,22 +1,56 @@
 import * as Utils from './utilities.js'
 import { Config } from './bootstrap.js'
 import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'
+import View from './view.js'
 import _range from '../node_modules/lodash-es/range.js'
 import _random from '../node_modules/lodash-es/random.js'
 import _isUndefined from '../node_modules/lodash-es/isUndefined.js'
 
 export default class Grid {
-  constructor () {
+  constructor (scale) {
     /**
      * @type {View}
      */
     this.view = Config.view
+    /**
+     * @type {Number}
+     */
+    this.scale = scale
     /**
      * @type {Array[]}
      */
     this.values = this.create()
 
     Config.grid = this
+  }
+
+  /**
+   * @param {Number} scale
+   */
+  set scale (scale) {
+    Utils.assertIsOfType(scale, 'number')
+    this._scale = scale
+  }
+
+  /**
+   * @returns {Number}
+   */
+  get scale () {
+    return this._scale
+  }
+
+  /**
+   * @returns {Number}
+   */
+  get width () {
+    return this.view.width / this.scale
+  }
+
+  /**
+   * @returns {Number}
+   */
+  get height () {
+    return this.view.height / this.scale
   }
 
   /**
@@ -38,8 +72,8 @@ export default class Grid {
    * @returns {Array[]}
    */
   create () {
-    let horizontal = _range(0, this.view.scaledWidth)
-    let vertical = _range(0, this.view.scaledHeight)
+    let horizontal = _range(0, this.width)
+    let vertical = _range(0, this.height)
 
     return vertical.map(y => horizontal.map(x => {
       let coord = new Coord(x, y)
@@ -62,9 +96,10 @@ export default class Grid {
    */
   set (point) {
     let { x, y } = point.coord
+    let canvasCoord = point.coord.toCanvasCoord()
 
     this.view.context.fillStyle = point.sprite.color
-    this.view.context.fillRect(x, y, 1, 1)
+    this.view.context.fillRect(canvasCoord.x, canvasCoord.y, this.scale, this.scale)
 
     this.values[y][x] = point
 
@@ -153,9 +188,21 @@ export class Coord {
   /**
    * @returns {Coord}
    */
+  toCanvasCoord () {
+    let grid = Config.grid
+    let x = this.x * grid.scale
+    let y = this.y * grid.scale
+    let canvasCoord = new Coord(x, y)
+
+    return canvasCoord
+  }
+
+  /**
+   * @returns {Coord}
+   */
   static random () {
-    let x = _random(2, (Config.view.scaledWidth - 2))
-    let y = _random(2, (Config.view.scaledHeight - 2))
+    let x = _random(2, (Config.grid.width - 2))
+    let y = _random(2, (Config.grid.height - 2))
 
     let coord = new Coord(x, y)
 

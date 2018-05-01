@@ -7,11 +7,8 @@ export default class View {
   /**
    * @param {Number} [width=640]
    * @param {Number} [height=480]
-   * @param {Number} [scale=10]
    */
-  constructor (width = 640, height = 480, scale = 10) {
-    Utils.assert(width % scale === 0, `width must be a multiple of ${scale}`)
-    Utils.assert(height % scale === 0, `height must be a multiple of ${scale}`)
+  constructor (width = 640, height = 480) {
     /**
      * @type {Number}
      */
@@ -20,10 +17,6 @@ export default class View {
      * @type {Number}
      */
     this.height = height
-    /**
-     * @type {Number}
-     */
-    this.scale = scale
     /**
      * @type {HTMLCanvasElement}
      */
@@ -34,9 +27,8 @@ export default class View {
     this.canvas.width = this.width
     this.canvas.height = this.height
 
-    this.context.scale(this.scale, this.scale)
     this.context.fillStyle = Game.Color.BACKGROUND
-    this.context.fillRect(0, 0, this.scaledWidth, (this.scaledHeight))
+    this.context.fillRect(0, 0, this.width, this.height)
 
     Config.view = this
   }
@@ -64,21 +56,6 @@ export default class View {
   }
 
   /**
-   * @param {Number} scale
-   */
-  set scale (scale) {
-    Utils.assertIsOfType(scale, 'number')
-    this._scale = scale
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get scale () {
-    return this._scale
-  }
-
-  /**
    * @param {Number} width
    */
   set width (width) {
@@ -94,13 +71,6 @@ export default class View {
   }
 
   /**
-   * @returns {Number}
-   */
-  get scaledWidth () {
-    return this.width / this.scale
-  }
-
-  /**
    * @param {Number} height
    */
   set height (height) {
@@ -113,12 +83,5 @@ export default class View {
    */
   get height () {
     return this._height
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get scaledHeight () {
-    return this.height / this.scale
   }
 }
