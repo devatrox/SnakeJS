@@ -193,7 +193,7 @@ export class Coord {
   toCanvasCoord () {
     let view = Config.view
     let grid = Config.grid
-    let x = (this.x * grid.scale) + view.uiHeight
+    let x = (this.x * grid.scale)
     let y = (this.y * grid.scale) + view.uiHeight
     let canvasCoord = new Coord(x, y)
 
