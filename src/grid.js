@@ -4,7 +4,6 @@ import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'
 import View from './view.js'
 import _range from '../node_modules/lodash-es/range.js'
 import _random from '../node_modules/lodash-es/random.js'
-import _isUndefined from '../node_modules/lodash-es/isUndefined.js'
 
 export default class Grid {
   constructor (scale) {
@@ -43,14 +42,14 @@ export default class Grid {
    * @returns {Number}
    */
   get width () {
-    return this.view.width / this.scale
+    return this.view.gameWidth / this.scale
   }
 
   /**
    * @returns {Number}
    */
   get height () {
-    return this.view.height / this.scale
+    return this.view.gameHeight / this.scale
   }
 
   /**
@@ -121,10 +120,13 @@ export default class Grid {
   /**
    * @param {Point} point
    * @param {Coord} coord
+   * @param {Boolean} [copy]
    * @returns {Grid}
    */
-  move (point, coord) {
-    this.delete(point)
+  move (point, coord, copy = false) {
+    if (!copy) {
+      this.delete(point)
+    }
     point.coord = coord
     this.set(point)
 
@@ -189,9 +191,10 @@ export class Coord {
    * @returns {Coord}
    */
   toCanvasCoord () {
+    let view = Config.view
     let grid = Config.grid
-    let x = this.x * grid.scale
-    let y = this.y * grid.scale
+    let x = (this.x * grid.scale) + view.uiHeight
+    let y = (this.y * grid.scale) + view.uiHeight
     let canvasCoord = new Coord(x, y)
 
     return canvasCoord

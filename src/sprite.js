@@ -1,3 +1,4 @@
+import Game from './game.js'
 export class Sprite {
   /**
    * @param {String} name
@@ -17,18 +18,18 @@ export class Sprite {
 
 export class EmptySprite extends Sprite {
   constructor () {
-    super('empty', '#000000')
+    super('empty', Game.Color.BACKGROUND)
   }
 }
 
 export class FoodSprite extends Sprite {
   constructor () {
-    super('snake', '#00ff00')
+    super('snake', Game.Color.FOOD)
   }
 }
 
 export class SnakeSprite extends Sprite {
   constructor () {
-    super('snake', '#ff0000')
+    super('snake', Game.Color.SNAKE)
   }
 }

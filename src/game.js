@@ -15,6 +15,7 @@ export default class Game {
   constructor (width = 640, height = 480, scale = 10) {
     Utils.assert(width % scale === 0, `width must be a multiple of ${scale}`)
     Utils.assert(height % scale === 0, `height must be a multiple of ${scale}`)
+    Utils.assert(height > 300, `height must be at least 300`)
     /**
      * @type {View}
      */
@@ -34,7 +35,7 @@ export default class Game {
     /**
      * @type {Number}
      */
-    this.speed = 100
+    this.speed = 75
     /**
      * @type {Players}
      */
@@ -130,19 +131,22 @@ export default class Game {
   init () {
     window.onerror = () => this.pause('Error occured')
 
+    this.onPlayerJoined = (e, player) => this.view.drawScore()
+    this.onBumpScore = (e, player) => this.view.drawScore()
     this.onMaxScore = (e, player) => this.pause('Max score reached')
-    this.onEatFood = (e, player) => player.score.current++
+    this.onEatFood = (e, player) => player.score.bump()
     this.onEatFood = (e, player) => this.food.reset()
     this.onEnterKeyPress = (e, key) => this.play(10)
     this.onEscapeKeyPress = (e, key) => this.pause('Escape key pressed')
     this.onBump = (e, player, entity) => this.pause('Bumped into something')
 
-    this.debug()
+    // this.debug()
 
     window.Game = this
   }
 
   debug () {
+    this.onEatFood = (e, player) => Utils.notify(`Player "${player.username}" ate food`)
     this.onPlay = (e, delay) => Utils.notify(`Game started with delay of ${delay}s`)
     this.onPause = (e, reason) => Utils.notify(`Game paused with reason "${reason}"`)
     this.onPlayerJoined = (e, player) => Utils.notify(`Player "${player.username}" joined`)
@@ -192,9 +196,11 @@ export default class Game {
  * @enum {String}
  */
 Game.Color = {
-  SNAKE: '#ffffff',
+  SNAKE: '#00ff00',
   FOOD: '#ff0000',
-  BACKGROUND: '#000000'
+  BACKGROUND: '#000000',
+  UI: '#666666',
+  UI_TEXT: '#ffffff'
 }
 
 /**
@@ -210,31 +216,3 @@ Game.Events = {
   PLAYER_JOINED: 'playerJoined.snake',
   PLAYER_LOST: 'playerLost.snake'
 }
-
-Game.Entities = {
-  Snake: {
-    NAME: 'snake',
-    COLOR: Game.Color.SNAKE
-  },
-  Food: {
-    NAME: 'food',
-    COLOR: Game.Color.FOOD
-  }
-}
-
-/**
- * @callback generalCallback
- * @param {CustomEvent} event
- */
-
-/**
- * @callback playerCallback
- * @param {CustomEvent} event
- * @param {Player} player
- */
-
-/**
- * @callback keyPressCallback
- * @param {KeyboardEvent} event
- * @param {Key} key
- */

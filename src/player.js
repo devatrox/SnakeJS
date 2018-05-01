@@ -18,15 +18,20 @@ export class Players extends Set {
   }
   /**
    * @param {String} username
+   * @fires Game.Events.PLAYER_JOINED
    * @returns {Players}
    */
   add (username) {
-    if (this.size + 1 === this.maxPlayers) return
+    if (this.size === this.maxPlayers) return
 
     let player = new Player(username)
     player.keySet = Keys.keySets[this.size]
 
     super.add(player)
+
+    Utils.emit(Game.Events.PLAYER_JOINED, {
+      player: player
+    })
 
     return this
   }
@@ -58,7 +63,6 @@ export const System = {
 export default class Player {
   /**
    * @param {String} username
-   * @fires Game.Events.PLAYER_JOINED
    */
   constructor (username) {
     /**
@@ -75,10 +79,6 @@ export default class Player {
     this.score = new Score(this)
 
     this.bindKeys()
-
-    Utils.emit(Game.Events.PLAYER_JOINED, {
-      player: this
-    })
   }
 
   /**
@@ -172,14 +172,14 @@ export default class Player {
 
 export class Score {
   /**
-   * @param {Player} player
-   * @param {Number} [max = 10]
+   * @param {Player} owner
+   * @param {Number} [max]
    */
-  constructor (player, max = 10) {
+  constructor (owner, max = Infinity) {
     /**
      * @type {Player}
      */
-    this.player = player
+    this.owner = owner
     /**
      * @type {Number}
      */
@@ -194,25 +194,27 @@ export class Score {
   set current (score) {
     if (score > this.maxScore) {
       return Utils.emit(Game.Events.MAX_SCORE, {
-        player: this.player
+        player: this.owner
       })
     }
     this._current = score
-
-    Utils.emit(Game.Events.BUMPED_SCORE, {
-      score: this.current,
-      player: this.player
-    })
   }
 
   /**
    * @returns {Number}
    */
   get current () {
-    return this._current || 0
+    return this._current || 1
   }
 
   bump () {
     this.current++
+
+    this.owner.snake.maxSize++
+
+    Utils.emit(Game.Events.BUMPED_SCORE, {
+      score: this.current,
+      player: this.owner
+    })
   }
 }

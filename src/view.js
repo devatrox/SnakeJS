@@ -18,6 +18,10 @@ export default class View {
      */
     this.height = height
     /**
+     * @type {Number}
+     */
+    this.uiHeight = 50
+    /**
      * @type {HTMLCanvasElement}
      */
     this.canvas = document.createElement('canvas')
@@ -27,8 +31,7 @@ export default class View {
     this.canvas.width = this.width
     this.canvas.height = this.height
 
-    this.context.fillStyle = Game.Color.BACKGROUND
-    this.context.fillRect(0, 0, this.width, this.height)
+    this.draw()
 
     Config.view = this
   }
@@ -71,6 +74,13 @@ export default class View {
   }
 
   /**
+   * @returns {Number}
+   */
+  get gameWidth () {
+    return this.width
+  }
+
+  /**
    * @param {Number} height
    */
   set height (height) {
@@ -83,5 +93,36 @@ export default class View {
    */
   get height () {
     return this._height
+  }
+
+  /**
+   * @returns {Number}
+   */
+  get gameHeight () {
+    return this.height - this.uiHeight
+  }
+
+  draw () {
+    this.drawUi()
+
+    this.context.fillStyle = Game.Color.BACKGROUND
+    this.context.fillRect(0, this.uiHeight, this.width, this.height - this.uiHeight)
+  }
+
+  drawUi () {
+    this.context.fillStyle = Game.Color.UI
+    this.context.fillRect(0, 0, this.width, this.uiHeight)
+  }
+
+  drawScore () {
+    this.drawUi()
+
+    let players = Array.from(Config.game.players)
+
+    let scores = players.map(player => `${player.username}: ${player.score.current}`)
+
+    this.context.fillStyle = Game.Color.UI_TEXT
+    this.context.font = '16px monospace'
+    this.context.fillText(scores.join(' / '), 10, 40)
   }
 }

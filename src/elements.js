@@ -1,8 +1,8 @@
 import * as Utils from './utilities.js'
 import Game from './game.js'
 import { Config } from './bootstrap.js'
-import { Coord } from './grid.js'
-import _random from '../node_modules/lodash-es/random.js'
+import Grid, { Coord } from './grid.js'
+import * as Keys from './keys.js'
 import { Sprite, EmptySprite, FoodSprite, SnakeSprite } from './sprite.js'
 import Player, { System } from './player.js'
 
@@ -12,8 +12,13 @@ export class Point {
    * @param {Sprite} sprite
    */
   constructor (coord, sprite) {
+    /**
+     * @type {Coord}
+     */
     this.coord = coord
-
+    /**
+     * @type {Sprite}
+     */
     this.sprite = sprite
     /**
      * @type {Grid}
@@ -68,7 +73,9 @@ export class Entity extends Point {
    */
   constructor (sprite, owner, coord) {
     super(coord, sprite)
-
+    /**
+     * @type {Player|System}
+     */
     this.owner = owner || System
 
     this.grid.set(this)
@@ -76,11 +83,14 @@ export class Entity extends Point {
 
   /**
    * @param {Game.Direction|Coord} direction
+   * @param {Boolean} [copy]
+   *
    * @fires Game.Events.BUMP
    * @fires Game.Events.EAT_FOOD
+   *
    * @returns {Entity}
    */
-  move (direction) {
+  move (direction, copy) {
     let coord
 
     if (direction instanceof Coord) {
@@ -109,7 +119,7 @@ export class Entity extends Point {
       })
     }
 
-    this.grid.move(this, coord)
+    this.grid.move(this, coord, copy)
   }
 
   /**
@@ -160,16 +170,25 @@ export class Snake extends Set {
   constructor (owner, coord) {
     super()
 
+    /**
+     * @type {Player}
+     */
     this.owner = owner
+    /**
+     * @type {Number}
+     */
+    this.maxSize = 2
 
-    this.add(new SnakePiece(owner, coord))
+    this.add(new SnakePiece(owner, coord)).move(new Keys.DirectionUp())
   }
+
   /**
    * @returns {SnakePiece}
    */
   get head () {
     return this.getNum(this.size)
   }
+
   /**
    * @returns {SnakePiece}
    */
@@ -186,26 +205,22 @@ export class Snake extends Set {
   }
 
   /**
-   * @returns {SnakePiece}
-   */
-  removeTail () {
-    let tail = this.tail
-    this.delete(this.tail)
-
-    return tail
-  }
-
-  /**
-   * @param {Game.Direction} direction
+   * @param {Coord|Keys.Direction} direction
+   * @returns {Snake}
    */
   move (direction) {
-    let prevCoord = direction
+    let prevDirection = direction
 
-    /** @param {SnakePiece} piece */
     this.forEach(piece => {
       let tmpPrevCoord = piece.coord
-      piece.move(prevCoord)
-      prevCoord = tmpPrevCoord
+      piece.move(prevDirection)
+      prevDirection = tmpPrevCoord
     })
+
+    if (this.maxSize > this.size) {
+      this.add(new SnakePiece(this.owner, prevDirection))
+    }
+
+    return this
   }
 }
