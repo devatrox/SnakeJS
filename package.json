@@ -5,26 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "npx http-server",
-    "build": "browserify -t [ babelify ] src/index.js -o dist/index.js",
-    "test": "build && mocha --require babel-register",
     "lint": "eslint ."
   },
   "author": "Jason Nickel <mail@jasonnickel.de>",
   "license": "MIT",
   "devDependencies": {
-    "ajv": "^6.1.1",
-    "ajv-keywords": "^3.1.0",
-    "babel-core": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "babelify": "^8.0.0",
-    "browserify": "^16.1.0",
     "eslint": "^4.6.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1",
-    "mocha": "^5.0.1"
+    "eslint-plugin-standard": "^3.0.1"
   },
   "dependencies": {
     "lodash-es": "^4.17.8"
