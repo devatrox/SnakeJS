@@ -10,6 +10,8 @@ export default class View {
    * @param {Number} [scale=10]
    */
   constructor (width = 640, height = 480, scale = 10) {
+    Utils.assert(width % scale === 0, `width must be a multiple of ${scale}`)
+    Utils.assert(height % scale === 0, `height must be a multiple of ${scale}`)
     /**
      * @type {Number}
      */
@@ -26,23 +28,17 @@ export default class View {
      * @type {HTMLCanvasElement}
      */
     this.canvas = document.createElement('canvas')
-    /**
-     * @type {CanvasRenderingContext2D}
-     */
-    this.gameContext = this.canvas.getContext('2d')
 
     document.body.appendChild(this.canvas)
 
     this.canvas.width = this.width
     this.canvas.height = this.height
 
-    this.gameContext.scale(this.scale, this.scale)
-    this.gameContext.fillStyle = Game.Color.BACKGROUND
-    this.gameContext.fillRect(0, 2, this.scaledWidth, (this.scaledHeight - 2))
+    this.context.scale(this.scale, this.scale)
+    this.context.fillStyle = Game.Color.BACKGROUND
+    this.context.fillRect(0, 0, this.scaledWidth, (this.scaledHeight))
 
-    Config.View = this
-
-    console.info('View initialized')
+    Config.view = this
   }
 
   /**
@@ -58,6 +54,13 @@ export default class View {
    */
   get canvas () {
     return this._canvas
+  }
+
+  /**
+   * @returns {CanvasRenderingContext2D}
+   */
+  get context () {
+    return this.canvas.getContext('2d')
   }
 
   /**

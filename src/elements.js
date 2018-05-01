@@ -3,8 +3,8 @@ import Game from './game.js'
 import { Config } from './bootstrap.js'
 import { Coord } from './grid.js'
 import _random from '../node_modules/lodash-es/random.js'
-import _isUndefined from '../node_modules/lodash-es/isUndefined.js'
 import { Sprite, EmptySprite, FoodSprite, SnakeSprite } from './sprite.js'
+import Player, { System } from './player.js'
 
 export class Point {
   /**
@@ -18,15 +18,14 @@ export class Point {
     /**
      * @type {Grid}
      */
-    this.grid = Config.Grid
+    this.grid = Config.grid
   }
 
   /**
    * @param {Coord} coord
    */
   set coord (coord) {
-    Utils.assertIsInstanceOf(coord, Coord)
-    this._coord = coord
+    this._coord = coord || Coord.random()
   }
 
   /**
@@ -64,46 +63,21 @@ export class EmptySpace extends Point {
 export class Entity extends Point {
   /**
    * @param {Sprite} sprite
+   * @param {Player} [owner]
    * @param {Coord} [coord]
    */
-  constructor (sprite, coord) {
-    if (_isUndefined(coord)) {
-      return Entity.random(sprite)
-    }
-
+  constructor (sprite, owner, coord) {
     super(coord, sprite)
+
+    this.owner = owner || System
 
     this.grid.set(this)
   }
 
   /**
-   * @param {Coord} coord
-   * @returns {Boolean}
-   */
-  static exists (coord) {
-    return Config.Grid.get(coord) instanceof Entity
-  }
-
-  /**
-   * @param {String} sprite
-   * @returns {Entity}
-   */
-  static random (sprite) {
-    let x = _random(2, (Config.View.scaledWidth - 2))
-    let y = _random(2, (Config.View.scaledHeight - 2))
-
-    let coord = new Coord(x, y)
-
-    if (Entity.exists(coord)) {
-      return Entity.random(sprite)
-    }
-
-    return new Entity(sprite, coord)
-  }
-
-  /**
    * @param {Game.Direction|Coord} direction
    * @fires Game.Events.BUMP
+   * @fires Game.Events.EAT_FOOD
    * @returns {Entity}
    */
   move (direction) {
@@ -112,20 +86,48 @@ export class Entity extends Point {
     if (direction instanceof Coord) {
       coord = direction
     } else {
-      let x = this.coord.x + direction[0]
-      let y = this.coord.y + direction[1]
+      let x = this.coord.x + direction.movement[0]
+      let y = this.coord.y + direction.movement[1]
+      const screenWidth = Config.view.scaledWidth - 1
+      const screenHeight = Config.view.scaledHeight - 1
+
+      // If snake is out of bounds, come out of opposite side
+      if (x < 0) x = screenWidth
+      if (x > screenWidth) x = 0
+      if (y < 0) y = screenHeight
+      if (y > screenHeight) y = 0
 
       coord = new Coord(x, y)
     }
 
-    if (Entity.exists(coord)) {
+    if (Entity.exists(coord) && Entity.isNotFood(coord)) {
       return Utils.emit(Game.Events.BUMP, {
+        player: this.owner,
         entity: this.grid.get(coord)
+      })
+    } else if (Config.grid.get(coord) instanceof Food) {
+      Utils.emit(Game.Events.EAT_FOOD, {
+        player: this.owner
       })
     }
 
-    this.grid.delete(this.coord)
-    return new Entity(this.sprite, coord)
+    this.grid.move(this, coord)
+  }
+
+  /**
+   * @param {Coord} coord
+   * @returns {Boolean}
+   */
+  static exists (coord) {
+    return Config.grid.get(coord) instanceof Entity
+  }
+
+  /**
+   * @param {Coord} coord
+   * @returns {Boolean}
+   */
+  static isNotFood (coord) {
+    return !(Config.grid.get(coord) instanceof Food)
   }
 }
 
@@ -134,27 +136,35 @@ export class Food extends Entity {
    * @param {Coord} [coord]
    */
   constructor (coord) {
-    super(new FoodSprite(), coord)
+    super(new FoodSprite(), null, coord)
+  }
+
+  reset () {
+    this.move(Coord.random())
   }
 }
 
 export class SnakePiece extends Entity {
   /**
+   * @param {Player} owner
    * @param {Coord} [coord]
    */
-  constructor (coord) {
-    super(new SnakeSprite(), coord)
+  constructor (owner, coord) {
+    super(new SnakeSprite(), owner, coord)
   }
 }
 
 export class Snake extends Set {
   /**
+   * @param {Player} owner
    * @param {Coord} [coord]
    */
-  constructor (coord) {
+  constructor (owner, coord) {
     super()
 
-    this.add(new SnakePiece(coord))
+    this.owner = owner
+
+    this.add(new SnakePiece(owner, coord))
   }
   /**
    * @returns {SnakePiece}

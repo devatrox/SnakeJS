@@ -4,6 +4,7 @@ import Grid, { Coord } from './grid.js'
 import { Snake, Entity, Food } from './elements.js'
 import { Config } from './bootstrap.js'
 import * as Keys from './keys.js'
+import Player, { Players, Score } from './player.js'
 
 export default class Game {
   /**
@@ -31,189 +32,157 @@ export default class Game {
     /**
      * @type {Number}
      */
-    this.speed = 500
+    this.speed = 100
     /**
      * @type {Players}
      */
     this.players = new Players()
+    /**
+     * @type {Food}
+     */
+    this.food = new Food()
 
-    this.debug = {
-      eatFood: () => Utils.emit(Game.Events.EAT_FOOD, {
-        player: this.getPlayer(0)
-      }),
-      playerLost: () => Utils.emit(Game.Events.PLAYER_LOST, {
-        player: this.getPlayer(0)
-      })
-    }
+    Config.game = this
 
     this.init()
   }
 
-  set onStarted (cb) {
-    window.addEventListener(Game.Events.STARTED, event => cb(event))
-  }
-
+  /**
+   * @param {{cb: (event: Event, player: Player)}} cb
+   */
   set onMaxScore (cb) {
     window.addEventListener(Game.Events.MAX_SCORE, event => cb(event, event.detail.player))
   }
 
+  /**
+   * @param {{cb: (event: Event, player: Player)}} cb
+   */
+  set onBumpScore (cb) {
+    window.addEventListener(Game.Events.BUMPED_SCORE, event => cb(event, event.detail.player))
+  }
+
+  /**
+   * @param {{cb: (event: Event, player: Player)}} cb
+   */
   set onPlayerJoined (cb) {
     window.addEventListener(Game.Events.PLAYER_JOINED, event => cb(event, event.detail.player))
   }
 
+  /**
+   * @param {{cb: (event: Event, player: Player)}} cb
+   */
   set onPlayerLost (cb) {
     window.addEventListener(Game.Events.PLAYER_LOST, event => cb(event, event.detail.player))
   }
 
+  /**
+   * @param {{cb: (event: Event, player: Player)}} cb
+   */
   set onEatFood (cb) {
     window.addEventListener(Game.Events.EAT_FOOD, event => cb(event, event.detail.player))
   }
 
+  /**
+   * @param {{cb: (event: Event, player: Player, entity: Entity)}} cb
+   */
   set onBump (cb) {
-    window.addEventListener(Game.Events.BUMP, event => cb(event, event.detail.entity))
+    window.addEventListener(Game.Events.BUMP, event => cb(event, event.detail.player, event.detail.entity))
+  }
+
+  /**
+   * @param {{cb: (event: Event, delay: Number)}} cb
+   */
+  set onPlay (cb) {
+    window.addEventListener(Game.Events.PLAY, event => cb(event, event.detail.delay))
+  }
+
+  /**
+   * @param {{cb: (event: Event, reason: ?String)}} cb
+   */
+  set onPause (cb) {
+    window.addEventListener(Game.Events.PAUSED, event => cb(event, event.detail.reason))
+  }
+
+  /**
+   * @param {{cb: (event: Event, key: Keys.EscapeKey)}} cb
+   */
+  set onEscapeKeyPress (cb) {
+    window.addEventListener('keydown', e => {
+      let escape = new Keys.EscapeKey()
+
+      if (escape.keyName === e.key) cb(e, escape)
+    }, false)
+  }
+
+  /**
+   * @param {{cb: (event: Event, key: Keys.EnterKey)}} cb
+   */
+  set onEnterKeyPress (cb) {
+    window.addEventListener('keydown', e => {
+      let enter = new Keys.EnterKey()
+
+      if (enter.keyName === e.key) cb(e, enter)
+    }, false)
   }
 
   init () {
-    this.onStarted = (e) => Utils.notify('Game started')
-    this.onPlayerJoined = (e, player) => Utils.notify(`Player "${player.name}" joined`, player)
-    this.onPlayerLost = (e, player) => Utils.notify(`Player "${player.name}" lost!`)
-    this.onMaxScore = (e, player) => Utils.notify(`Max score of "${Config.Score.maxScore}" reached by "${player.name}"`)
-    this.onMaxScore = (e, player) => this.pause()
-    this.onEatFood = (e, player) => Config.Score.current++
-    this.onEatFood = (e, player) => new Food()
-    this.onBump = (e, player) => Utils.notify(`"${player.name}" bumped into something`)
+    window.onerror = () => this.pause('Error occured')
+
+    this.onMaxScore = (e, player) => this.pause('Max score reached')
+    this.onEatFood = (e, player) => player.score.current++
+    this.onEatFood = (e, player) => this.food.reset()
+    this.onEnterKeyPress = (e, key) => this.play(10)
+    this.onEscapeKeyPress = (e, key) => this.pause('Escape key pressed')
+    this.onBump = (e, player, entity) => this.pause('Bumped into something')
+
+    this.debug()
 
     window.Game = this
   }
 
-  /**
-   * @param {String} name
-   */
-  addPlayer (name) {
-    let player = new Player(name)
-    player.keySet = Keys.keySets[this.players.size]
-
-    this.players.add(player)
-  }
-
-  /**
-   * @param {Player} player
-   */
-  deletePlayer (player) {
-    this.players.delete(player)
-  }
-
-  /**
-   * @param {Number} num
-   * @returns {Player}
-   */
-  getPlayer (num) {
-    return Array.from(this.players)[num]
-  }
-
-  /**
-   * @fires Game.Events.STARTED
-   */
-  start () {
-    let food = new Food()
-
-    this.bindKeys()
-
-    Utils.emit(Game.Events.STARTED)
+  debug () {
+    this.onPlay = (e, delay) => Utils.notify(`Game started with delay of ${delay}s`)
+    this.onPause = (e, reason) => Utils.notify(`Game paused with reason "${reason}"`)
+    this.onPlayerJoined = (e, player) => Utils.notify(`Player "${player.username}" joined`)
+    this.onPlayerLost = (e, player) => Utils.notify(`Player "${player.username}" lost!`)
+    this.onMaxScore = (e, player) => Utils.notify(`Max score of "${player.score.maxScore}" reached by "${player.username}"`)
+    this.onBumpScore = (e, player) => Utils.notify(`Score of "${player.username}" increased to ${player.score.current}!`)
+    this.onBump = (e, player, entity) => Utils.notify(`"${player.username}" bumped into "${entity.constructor.name}"`)
   }
 
   /**
    * @param {Number} delay - Delay in seconds
    */
   play (delay = 0) {
-    Utils.countDown(delay, num => console.info(`Starting in ${num} ...`)).then(() => {
-      this.intervalId = setInterval(this.loop.bind(this), this.speed)
-      this.isRunning = true
-    })
-  }
-
-  pause () {
-    clearInterval(this.intervalId)
-    this.isRunning = false
-  }
-
-  bindKeys () {
-    window.addEventListener('keydown', e => {
-      let key = e.key
-      let escape = new Keys.EscapeKey()
-      let enter = new Keys.EnterKey()
-
-      switch (key) {
-        case escape.name:
-          console.log(escape)
-          this.pause()
-          break
-        case enter.name:
-          console.log(enter)
-          if (!this.isRunning) {
-            this.play(5000)
-          }
-          break
-      }
-    }, false)
+    if (!this.isRunning) {
+      Utils.delay(delay).then(() => {
+        this.isRunning = true
+        this.intervalId = setInterval(() => this.loop(), this.speed)
+        Utils.emit(Game.Events.PLAY, {
+          delay: delay
+        })
+      })
+    }
   }
 
   /**
-   * @todo Rebuild
+   * @param {?String} [reason]
+   */
+  pause (reason) {
+    if (this.isRunning) {
+      clearInterval(this.intervalId)
+      this.isRunning = false
+      Utils.emit(Game.Events.PAUSED, {
+        reason: reason
+      })
+    }
+  }
+
+  /**
+   * Do loopy things
    */
   loop () {
-    const move = Game.Direction[this.currentArrowKey]
-    const lastPos = this.snakePos[this.snakePos.length - 1]
-    let newPos = lastPos.move(move[0], move[1])
-
-    this.drawSnake(newPos)
-  }
-
-  /**
-   * @param {Point} pixel
-   * @todo Rebuild
-   */
-  drawSnake (pixel) {
-    const ctx = this.gameContext
-
-    // If snake is out of bounds, come out of opposite side
-    if (pixel.x < 0) pixel.x = this.width
-    if (pixel.x > this.width) pixel.x = 0
-    if (pixel.y < 0) pixel.y = this.height
-    if (pixel.y > this.height) pixel.y = 0
-
-    ctx.fillStyle = Game.Color.SNAKE
-    ctx.fillRect(pixel.x, pixel.y, 1, 1)
-
-    this.snakePos.push(pixel)
-
-    // Remove last pixel of snake
-    if (this.snakePos.length >= this.snakeLength) {
-      let removed = this.snakePos.splice(0, 1)[0]
-      ctx.fillStyle = Game.Color.BACKGROUND
-      ctx.fillRect(removed.x, removed.y, 1, 1)
-    }
-
-    // Eat food, respawn food
-    if (pixel.isEqual(this.foodPos)) {
-      this.snakeLength += 5
-      this.setScore()
-      // console.log(this.score)
-      this.drawFood(this.randomPosition())
-    }
-  }
-
-  /**
-   * @param {Point} pixel
-   * @todo Rebuild
-   */
-  drawFood (pixel) {
-    const ctx = this.gameContext
-
-    ctx.fillStyle = Game.Color.FOOD
-    ctx.fillRect(pixel.x, pixel.y, 1, 1)
-
-    this.foodPos = pixel
+    this.players.forEach(player => player.move())
   }
 }
 
@@ -230,7 +199,9 @@ Game.Color = {
  * @enum {String}
  */
 Game.Events = {
-  STARTED: 'started.snake',
+  PLAY: 'play.snake',
+  PAUSED: 'paused.snake',
+  BUMPED_SCORE: 'bumpedScore.snake',
   MAX_SCORE: 'maxScore.snake',
   EAT_FOOD: 'eatFood.snake',
   BUMP: 'bump.snake',
@@ -249,144 +220,19 @@ Game.Entities = {
   }
 }
 
-class Players extends Set {}
+/**
+ * @callback generalCallback
+ * @param {CustomEvent} event
+ */
 
-class Player {
-  /**
-   * @param {String} name
-   * @fires Game.Events.PLAYER_JOINED
-   */
-  constructor (name) {
-    /**
-     * @type {String}
-     */
-    this.name = name
-    /**
-     * @type {Snake}
-     */
-    this.snake = new Snake()
-    /**
-     * @type {Score}
-     */
-    this.score = new Score(this)
+/**
+ * @callback playerCallback
+ * @param {CustomEvent} event
+ * @param {Player} player
+ */
 
-    this.bindKeys()
-
-    Utils.emit(Game.Events.PLAYER_JOINED, {
-      player: this
-    })
-  }
-
-  /**
-   * @param {Keys.KeySet} keySet
-   */
-  set keySet (keySet) {
-    this._keySet = keySet
-  }
-
-  /**
-   * @returns {Keys.KeySet}
-   */
-  get keySet () {
-    return this._keySet
-  }
-
-  /**
-   * @param {Keys.PlayerDirectionKey} key
-   */
-  set currentDirection (key) {
-    Utils.assertIsInstanceOf(key, Keys.PlayerDirectionKey)
-    this.currentDirection = key
-  }
-
-  /**
-   * @returns {Keys.PlayerDirectionKey}
-   */
-  get currentDirection () {
-    return this._currentDirection || this.keySet.up
-  }
-
-  /**
-   * @param {Number} lives
-   * @fires Game.Events.PLAYER_LOST
-   */
-  set lives (lives) {
-    if (lives <= 0) {
-      Utils.emit(Game.Events.PLAYER_LOST, {
-        player: this
-      })
-    }
-    this._lives = lives
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get lives () {
-    return this._lives || 0
-  }
-
-  /**
-   * @param {Keys.PlayerDirectionKey} key
-   * @returns {Boolean}
-   */
-  isKeyAllowed (key) {
-    console.log('current', this.currentDirection)
-    console.log('new', key)
-    return key.name === this.currentDirection.name
-  }
-
-  bindKeys () {
-    window.addEventListener('keydown', e => {
-      if (!this.keySet) return
-
-      if (this.keySet.has(e.key)) {
-        let key = this.keySet.get(e.key)
-        console.log(key)
-        // No 180° turns allowed
-        if (this.isKeyAllowed(key)) {
-          this.currentDirection = key.direction
-        }
-      }
-    }, false)
-  }
-}
-
-export class Score {
-  /**
-   * @param {Player} player
-   * @param {Number} [max = 10]
-   */
-  constructor (player, max = 10) {
-    /**
-     * @type {Player}
-     */
-    this.player = player
-    /**
-     * @type {Number}
-     */
-    this.maxScore = max
-  }
-
-  /**
-   * @param {Number} score
-   * @fires Game.Events.MAX_SCORE
-   */
-  set current (score) {
-    if (score > this.maxScore) {
-      Utils.emit(Game.Events.MAX_SCORE, {
-        player: this.player
-      })
-
-      return
-    }
-    this._current = score
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get current () {
-    return this._current || 0
-  }
-}
+/**
+ * @callback keyPressCallback
+ * @param {KeyboardEvent} event
+ * @param {Key} key
+ */

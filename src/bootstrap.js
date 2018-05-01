@@ -1,17 +1,15 @@
-import View from './view.js'
-import { Score } from './game.js'
-import Grid from './grid.js'
-
 /**
  * @namespace
  * @property {String} notify
- * @property {?View} View
- * @property {?Grid} Grid
+ * @property {?Game} game
+ * @property {?View} view
+ * @property {?Grid} grid
  */
 export const Config = {
   notify: 'console',
-  View: null,
-  Grid: null
+  game: null,
+  view: null,
+  grid: null
 }
 
 window.Config = Config

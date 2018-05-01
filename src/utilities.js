@@ -2,18 +2,12 @@ import { Config } from './bootstrap.js'
 
 /**
  * @param {Number} seconds
- * @param {Function} fn
  * @returns {Promise}
  */
-export function countDown (seconds, fn) {
-  let arr = Array.from(Array(seconds).keys())
+export function delay (seconds) {
+  let ms = seconds * 100
 
-  return Promise.all(arr.map(number => {
-    return new Promise(resolve => {
-      fn(number)
-      setTimeout(resolve, 1000)
-    })
-  }))
+  return new Promise(resolve => window.setTimeout(resolve, ms))
 }
 
 /**

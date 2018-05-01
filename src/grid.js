@@ -1,24 +1,22 @@
 import * as Utils from './utilities.js'
 import { Config } from './bootstrap.js'
-import { EmptySpace, Point } from './elements.js'
+import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'
 import _range from '../node_modules/lodash-es/range.js'
+import _random from '../node_modules/lodash-es/random.js'
+import _isUndefined from '../node_modules/lodash-es/isUndefined.js'
 
 export default class Grid {
   constructor () {
     /**
      * @type {View}
      */
-    this.view = Config.View
-    /**
-     * @type {CanvasRenderingContext2D}
-     */
-    this.context = this.view.gameContext
+    this.view = Config.view
     /**
      * @type {Array[]}
      */
     this.values = this.create()
 
-    Config.Grid = this
+    Config.grid = this
   }
 
   /**
@@ -60,14 +58,13 @@ export default class Grid {
 
   /**
    * @param {Point} point
-   * @param {Coord} coord
    * @returns {Grid}
    */
   set (point) {
     let { x, y } = point.coord
 
-    this.context.fillStyle = point.sprite.color
-    this.context.fillRect(x, y, 1, 1)
+    this.view.context.fillStyle = point.sprite.color
+    this.view.context.fillRect(x, y, 1, 1)
 
     this.values[y][x] = point
 
@@ -75,17 +72,26 @@ export default class Grid {
   }
 
   /**
+   * @param {Point} point
+   * @returns {Grid}
+   */
+  delete (point) {
+    let empty = new EmptySpace(point.coord)
+
+    this.set(empty)
+
+    return this
+  }
+
+  /**
+   * @param {Point} point
    * @param {Coord} coord
    * @returns {Grid}
    */
-  delete (coord) {
-    let empty = new EmptySpace(coord)
-    let { x, y } = empty.coord
-
-    this.context.fillStyle = empty.sprite.color
-    this.context.fillRect(x, y, 1, 1)
-
-    this.set(empty)
+  move (point, coord) {
+    this.delete(point)
+    point.coord = coord
+    this.set(point)
 
     return this
   }
@@ -142,5 +148,21 @@ export class Coord {
    */
   get toArray () {
     return [this.x, this.y]
+  }
+
+  /**
+   * @returns {Coord}
+   */
+  static random () {
+    let x = _random(2, (Config.view.scaledWidth - 2))
+    let y = _random(2, (Config.view.scaledHeight - 2))
+
+    let coord = new Coord(x, y)
+
+    if (Entity.exists(coord)) {
+      return Coord.random()
+    }
+
+    return coord
   }
 }
