@@ -17,7 +17,5 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1"
   },
-  "dependencies": {
-    "lodash-es": "^4.17.8"
-  }
+  "dependencies": {}
 }

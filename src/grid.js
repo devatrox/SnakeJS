@@ -2,8 +2,6 @@ import * as Utils from './utilities.js'
 import { Config } from './bootstrap.js'
 import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'
 import View from './view.js'
-import _range from '../node_modules/lodash-es/range.js'
-import _random from '../node_modules/lodash-es/random.js'
 
 export default class Grid {
   constructor (scale) {
@@ -71,8 +69,8 @@ export default class Grid {
    * @returns {Array[]}
    */
   create () {
-    let horizontal = _range(0, this.width)
-    let vertical = _range(0, this.height)
+    let horizontal = _.range(0, this.width)
+    let vertical = _.range(0, this.height)
 
     return vertical.map(y => horizontal.map(x => {
       let coord = new Coord(x, y)
@@ -204,8 +202,8 @@ export class Coord {
    * @returns {Coord}
    */
   static random () {
-    let x = _random(2, (Config.grid.width - 2))
-    let y = _random(2, (Config.grid.height - 2))
+    let x = _.random(2, (Config.grid.width - 2))
+    let y = _.random(2, (Config.grid.height - 2))
 
     let coord = new Coord(x, y)
 

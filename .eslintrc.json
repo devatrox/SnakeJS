@@ -10,6 +10,9 @@
     }
   },
   "extends": "standard",
+  "globals": {
+    "_": true
+  },
   "rules": {
     "no-unused-vars": "warn",
     "valid-jsdoc": [

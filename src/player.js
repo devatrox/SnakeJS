@@ -3,7 +3,6 @@ import Game from './game.js'
 import { Config } from './bootstrap.js'
 import { Snake, Entity, Food } from './elements.js'
 import * as Keys from './keys.js'
-import _debounce from '../node_modules/lodash-es/debounce.js'
 
 export class Players extends Set {
   /**
@@ -135,7 +134,7 @@ export default class Player {
    * @param {{cb: (event: Event, key: Keys.DirectionKey)}} cb
    */
   set onArrowKeyPress (cb) {
-    window.addEventListener('keydown', _debounce(e => {
+    window.addEventListener('keydown', _.debounce(e => {
       if (!this.keySet) return
       if (!Config.game.isRunning) return
 
