@@ -5,10 +5,15 @@ import Grid from './grid.js'
 
 export default class View {
   /**
+   * @param {String} elementId
    * @param {Number} [width=640]
    * @param {Number} [height=480]
    */
-  constructor (width = 640, height = 480) {
+  constructor (elementId, width = 640, height = 480) {
+    /**
+     * @type {Element}
+     */
+    this.element = document.getElementById(elementId)
     /**
      * @type {Number}
      */
@@ -26,7 +31,7 @@ export default class View {
      */
     this.canvas = document.createElement('canvas')
 
-    document.body.appendChild(this.canvas)
+    this.element.appendChild(this.canvas)
 
     this.canvas.width = this.width
     this.canvas.height = this.height

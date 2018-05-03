@@ -5,15 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Snake JS</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/css/bootstrap.min.css">
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+  <div class="container mt-4 mb-4">
+    <ul class="list-inline">
+      <li>
+        <a href="https://github.com/devatrox/SnakeJS" class="badge badge-secondary">Fork me on GitHub</a>
+      </li>
+    </ul>
+
+    <div class="controls">
+      <div class="input-group mb-3">
+        <input id="username" type="text" autofocus required pattern="[\w\döäüß]+" class="form-control" placeholder="Your name">
+        <div class="input-group-append">
+          <button id="start" type="button" class="btn btn-primary">Start game</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="game"></div>
+
+    <p>Use arrow Keys to move around</p>
+  </div>
+  <script src="https://cdn.jsdelivr.net/combine/npm/lodash@4,npm/jquery@3,npm/bootstrap@4/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="./src/index.js"></script>
 </body>
 </html>

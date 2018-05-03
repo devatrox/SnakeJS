@@ -8,18 +8,19 @@ import Player, { Players, Score } from './player.js'
 
 export default class Game {
   /**
+   * @param {String} elementId
    * @param {Number} [width=640]
    * @param {Number} [height=480]
    * @param {Number} [scale=10]
    */
-  constructor (width = 640, height = 480, scale = 10) {
+  constructor (elementId, width = 640, height = 480, scale = 10) {
     Utils.assert(width % scale === 0, `width must be a multiple of ${scale}`)
     Utils.assert(height % scale === 0, `height must be a multiple of ${scale}`)
     Utils.assert(height > 300, `height must be at least 300`)
     /**
      * @type {View}
      */
-    this.view = new View(width, height)
+    this.view = new View(elementId, width, height)
     /**
      * @type {Grid}
      */
@@ -136,11 +137,10 @@ export default class Game {
     this.onMaxScore = (e, player) => this.pause('Max score reached')
     this.onEatFood = (e, player) => player.score.bump()
     this.onEatFood = (e, player) => this.food.reset()
-    this.onEnterKeyPress = (e, key) => this.play(10)
     this.onEscapeKeyPress = (e, key) => this.pause('Escape key pressed')
     this.onBump = (e, player, entity) => this.pause('Bumped into something')
 
-    // this.debug()
+    this.debug()
 
     window.Game = this
   }
@@ -182,6 +182,10 @@ export default class Game {
         reason: reason
       })
     }
+  }
+
+  toggle () {
+    this[!this.isRunning ? 'play' : 'pause']()
   }
 
   /**
