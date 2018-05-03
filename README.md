@@ -16,6 +16,4 @@ Locally you can run `npx http-server` or the alias `npm start` to run it in loca
 
 ---
 
-You can add a second player by running `Config.game.players.add('NAME')` (he will use the WASD keys) in the browser console but as soon as they bump into each other, the game just pauses since two-player mode is not done yet :p
-
 Ideas and code suggestions are welcome!
