@@ -4,7 +4,8 @@ import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'
 import View from './view.js'
 
 export default class Grid {
-  constructor (scale) {
+  constructor (cellSize) {
+    Config.grid = this
     /**
      * @type {View}
      */
@@ -12,42 +13,40 @@ export default class Grid {
     /**
      * @type {Number}
      */
-    this.scale = scale
+    this.cellSize = cellSize
     /**
      * @type {Array[]}
      */
     this.values = this.create()
-
-    Config.grid = this
   }
 
   /**
-   * @param {Number} scale
+   * @param {Number} cellSize
    */
-  set scale (scale) {
-    Utils.assertIsOfType(scale, 'number')
-    this._scale = scale
+  set cellSize (cellSize) {
+    Utils.assertIsOfType(cellSize, 'number')
+    this._cellSize = cellSize
   }
 
   /**
    * @returns {Number}
    */
-  get scale () {
-    return this._scale
+  get cellSize () {
+    return this._cellSize
   }
 
   /**
    * @returns {Number}
    */
   get width () {
-    return this.view.gameWidth / this.scale
+    return this.view.gameWidth / this.cellSize
   }
 
   /**
    * @returns {Number}
    */
   get height () {
-    return this.view.gameHeight / this.scale
+    return this.view.gameHeight / this.cellSize
   }
 
   /**
@@ -93,10 +92,7 @@ export default class Grid {
    */
   set (point) {
     let { x, y } = point.coord
-    let canvasCoord = point.coord.toCanvasCoord()
-
-    this.view.context.fillStyle = point.sprite.color
-    this.view.context.fillRect(canvasCoord.x, canvasCoord.y, this.scale, this.scale)
+    point.draw()
 
     this.values[y][x] = point
 
@@ -191,8 +187,8 @@ export class Coord {
   toCanvasCoord () {
     let view = Config.view
     let grid = Config.grid
-    let x = (this.x * grid.scale)
-    let y = (this.y * grid.scale) + view.uiHeight
+    let x = (this.x * grid.cellSize)
+    let y = (this.y * grid.cellSize) + view.uiHeight
     let canvasCoord = new Coord(x, y)
 
     return canvasCoord

@@ -11,12 +11,14 @@ export default class Game {
    * @param {String} elementId
    * @param {Number} [width=640]
    * @param {Number} [height=480]
-   * @param {Number} [scale=10]
+   * @param {Number} [cellSize=10]
    */
-  constructor (elementId, width = 640, height = 480, scale = 10) {
-    Utils.assert(width % scale === 0, `width must be a multiple of ${scale}`)
-    Utils.assert(height % scale === 0, `height must be a multiple of ${scale}`)
+  constructor (elementId, width = 640, height = 480, cellSize = 10) {
+    Utils.assert(width % cellSize === 0, `width must be a multiple of ${cellSize}`)
+    Utils.assert(height % cellSize === 0, `height must be a multiple of ${cellSize}`)
     Utils.assert(height > 300, `height must be at least 300`)
+
+    Config.game = this
     /**
      * @type {View}
      */
@@ -24,7 +26,7 @@ export default class Game {
     /**
      * @type {Grid}
      */
-    this.grid = new Grid(scale)
+    this.grid = new Grid(cellSize)
     /**
      * @type {?Number}
      */
@@ -45,8 +47,6 @@ export default class Game {
      * @type {Food}
      */
     this.food = new Food()
-
-    Config.game = this
 
     this.init()
   }

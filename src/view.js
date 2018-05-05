@@ -8,8 +8,10 @@ export default class View {
    * @param {String} elementId
    * @param {Number} [width=640]
    * @param {Number} [height=480]
+   * @param {Number} [scale]
    */
-  constructor (elementId, width = 640, height = 480) {
+  constructor (elementId, width = 640, height = 480, scale = 1) {
+    Config.view = this
     /**
      * @type {Element}
      */
@@ -25,6 +27,10 @@ export default class View {
     /**
      * @type {Number}
      */
+    this.scale = scale
+    /**
+     * @type {Number}
+     */
     this.uiHeight = 50
     /**
      * @type {HTMLCanvasElement}
@@ -35,10 +41,9 @@ export default class View {
 
     this.canvas.width = this.width
     this.canvas.height = this.height
+    this.canvas.scale = this.scale
 
     this.draw()
-
-    Config.view = this
   }
 
   /**

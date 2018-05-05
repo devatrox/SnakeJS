@@ -24,6 +24,10 @@ export class Point {
      * @type {Grid}
      */
     this.grid = Config.grid
+    /**
+     * @type {View}
+     */
+    this.view = Config.view
   }
 
   /**
@@ -53,6 +57,12 @@ export class Point {
    */
   get sprite () {
     return this._sprite
+  }
+
+  draw () {
+    let canvasCoord = this.coord.toCanvasCoord()
+
+    this.sprite.draw(canvasCoord.x, canvasCoord.y)
   }
 }
 
