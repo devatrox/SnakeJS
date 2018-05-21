@@ -1,6 +1,7 @@
 import * as Utils from './utilities.js'
+import Assert from './assert.js'
 import View from './view.js'
-import Grid, { Coord } from './grid.js'
+import Grid from './grid.js'
 import { Snake, Entity, Food } from './elements.js'
 import { Config } from './bootstrap.js'
 import * as Keys from './keys.js'
@@ -9,28 +10,8 @@ import Player, { Players, Score } from './player.js'
 export default class Game {
   /**
    * @param {String} elementId
-   * @param {Number} [width=640]
-   * @param {Number} [height=480]
-   * @param {Number} [cellSize=10]
    */
-  constructor (elementId, width = 640, height = 480, cellSize = 10) {
-    Utils.assert(width % cellSize === 0, `width must be a multiple of ${cellSize}`)
-    Utils.assert(height % cellSize === 0, `height must be a multiple of ${cellSize}`)
-    Utils.assert(height > 300, `height must be at least 300`)
-
-    Config.game = this
-    /**
-     * @type {View}
-     */
-    this.view = new View(elementId, width, height)
-    /**
-     * @type {Grid}
-     */
-    this.grid = new Grid(cellSize)
-    /**
-     * @type {?Number}
-     */
-    this.intervalId = null
+  constructor (elementId) {
     /**
      * @type {Boolean}
      */
@@ -43,93 +24,129 @@ export default class Game {
      * @type {Players}
      */
     this.players = new Players()
-    /**
-     * @type {Food}
-     */
-    this.food = new Food()
 
     this.init()
+  }
+
+  /**
+   * @returns {Grid}
+   */
+  get grid () {
+    return Config.gridInstance
+  }
+
+  /**
+   * @returns {View}
+   */
+  get view () {
+    return Config.viewInstance
+  }
+
+  /**
+   * @param {Number} id
+   */
+  set intervalId (id) {
+    Assert.number(id)
+    clearInterval(this.intervalId)
+    this._intervalId = id
+  }
+
+  /**
+   * @returns {Number}
+   */
+  get intervalId () {
+    return this._intervalId
   }
 
   /**
    * @param {{cb: (event: Event, player: Player)}} cb
    */
   set onMaxScore (cb) {
-    window.addEventListener(Game.Events.MAX_SCORE, event => cb(event, event.detail.player))
+    Assert.function(cb)
+    Utils.listen(Game.Events.MAX_SCORE, event => cb(event, event.detail.player))
   }
 
   /**
    * @param {{cb: (event: Event, player: Player)}} cb
    */
   set onBumpScore (cb) {
-    window.addEventListener(Game.Events.BUMPED_SCORE, event => cb(event, event.detail.player))
+    Assert.function(cb)
+    Utils.listen(Game.Events.BUMPED_SCORE, event => cb(event, event.detail.player))
   }
 
   /**
    * @param {{cb: (event: Event, player: Player)}} cb
    */
   set onPlayerJoined (cb) {
-    window.addEventListener(Game.Events.PLAYER_JOINED, event => cb(event, event.detail.player))
+    Assert.function(cb)
+    Utils.listen(Game.Events.PLAYER_JOINED, event => cb(event, event.detail.player))
   }
 
   /**
    * @param {{cb: (event: Event, player: Player)}} cb
    */
   set onPlayerLost (cb) {
-    window.addEventListener(Game.Events.PLAYER_LOST, event => cb(event, event.detail.player))
+    Assert.function(cb)
+    Utils.listen(Game.Events.PLAYER_LOST, event => cb(event, event.detail.player))
   }
 
   /**
    * @param {{cb: (event: Event, player: Player)}} cb
    */
   set onEatFood (cb) {
-    window.addEventListener(Game.Events.EAT_FOOD, event => cb(event, event.detail.player))
+    Assert.function(cb)
+    Utils.listen(Game.Events.EAT_FOOD, event => cb(event, event.detail.player))
   }
 
   /**
    * @param {{cb: (event: Event, player: Player, entity: Entity)}} cb
    */
   set onBump (cb) {
-    window.addEventListener(Game.Events.BUMP, event => cb(event, event.detail.player, event.detail.entity))
+    Assert.function(cb)
+    Utils.listen(Game.Events.BUMP, event => cb(event, event.detail.player, event.detail.entity))
   }
 
   /**
    * @param {{cb: (event: Event, delay: Number)}} cb
    */
   set onPlay (cb) {
-    window.addEventListener(Game.Events.PLAY, event => cb(event, event.detail.delay))
+    Assert.function(cb)
+    Utils.listen(Game.Events.PLAY, event => cb(event, event.detail.delay))
   }
 
   /**
    * @param {{cb: (event: Event, reason: ?String)}} cb
    */
   set onPause (cb) {
-    window.addEventListener(Game.Events.PAUSED, event => cb(event, event.detail.reason))
+    Assert.function(cb)
+    Utils.listen(Game.Events.PAUSED, event => cb(event, event.detail.reason))
   }
 
   /**
    * @param {{cb: (event: Event, key: Keys.EscapeKey)}} cb
    */
   set onEscapeKeyPress (cb) {
-    window.addEventListener('keydown', e => {
+    Assert.function(cb)
+    Utils.listen('keydown', e => {
       let escape = new Keys.EscapeKey()
 
       if (escape.keyName === e.key) cb(e, escape)
-    }, false)
+    })
   }
 
   /**
    * @param {{cb: (event: Event, key: Keys.EnterKey)}} cb
    */
   set onEnterKeyPress (cb) {
-    window.addEventListener('keydown', e => {
+    Assert.function(cb)
+    Utils.listen('keydown', e => {
       let enter = new Keys.EnterKey()
 
       if (enter.keyName === e.key) cb(e, enter)
-    }, false)
+    })
   }
 
-  init () {
+  async init () {
     window.onerror = () => this.pause('Error occured')
 
     this.onPlayerJoined = (e, player) => this.view.drawScore()
@@ -140,9 +157,7 @@ export default class Game {
     this.onEscapeKeyPress = (e, key) => this.pause('Escape key pressed')
     this.onBump = (e, player, entity) => this.pause('Bumped into something')
 
-    this.debug()
-
-    window.Game = this
+    if (Config.debug) this.debug()
   }
 
   debug () {
@@ -154,12 +169,15 @@ export default class Game {
     this.onMaxScore = (e, player) => Utils.notify(`Max score of "${player.score.maxScore}" reached by "${player.username}"`)
     this.onBumpScore = (e, player) => Utils.notify(`Score of "${player.username}" increased to ${player.score.current}!`)
     this.onBump = (e, player, entity) => Utils.notify(`"${player.username}" bumped into "${entity.constructor.name}"`)
+
+    window.Game = this
   }
 
   /**
    * @param {Number} delay - Delay in seconds
    */
   play (delay = 0) {
+    Assert.number(delay)
     if (!this.isRunning) {
       Utils.delay(delay).then(() => {
         this.isRunning = true

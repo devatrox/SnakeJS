@@ -1,74 +1,82 @@
 import * as Utils from './utilities.js'
+import Assert from './assert.js'
 import Game from './game.js'
 import { Config } from './bootstrap.js'
-import Grid, { Coord } from './grid.js'
+import Grid from './grid.js'
+import { SpriteCoord, GridCoord, Coord } from './coords.js'
 import * as Keys from './keys.js'
-import { Sprite, EmptySprite, FoodSprite, SnakeSprite } from './sprite.js'
+import { SpriteSegment, EmptySprite, FoodSprite, SnakeSprite, SnakeHeadSprite, SnakeTailSprite, SnakeBodySprite } from './sprite.js'
 import Player, { System } from './player.js'
 
 export class Point {
   /**
-   * @param {Coord} coord
-   * @param {Sprite} sprite
+   * @param {GridCoord} coord
+   * @param {SpriteSegment} sprite
    */
   constructor (coord, sprite) {
     /**
-     * @type {Coord}
+     * @type {GridCoord}
      */
     this.coord = coord
     /**
-     * @type {Sprite}
+     * @type {SpriteSegment}
      */
     this.sprite = sprite
-    /**
-     * @type {Grid}
-     */
-    this.grid = Config.grid
-    /**
-     * @type {View}
-     */
-    this.view = Config.view
   }
 
   /**
-   * @param {Coord} coord
+   * @returns {Grid}
+   */
+  get grid () {
+    return Config.gridInstance
+  }
+
+  /**
+   * @returns {View}
+   */
+  get view () {
+    return Config.viewInstance
+  }
+
+  /**
+   * @param {GridCoord} coord
    */
   set coord (coord) {
-    this._coord = coord || Coord.random()
+    this._coord = coord || GridCoord.random()
+    this._coord.scale = Config.gridScale
   }
 
   /**
-   * @returns {Coord}
+   * @returns {GridCoord}
    */
   get coord () {
     return this._coord
   }
 
   /**
-   * @param {Sprite} sprite
+   * @param {SpriteSegment} sprite
    */
   set sprite (sprite) {
-    Utils.assertIsInstanceOf(sprite, Sprite)
+    Assert.instance(sprite, SpriteSegment)
+    sprite.draw(this.coord)
     this._sprite = sprite
   }
 
   /**
-   * @returns {Sprite}
+   * @returns {SpriteSegment}
    */
   get sprite () {
     return this._sprite
   }
 
   draw () {
-    let canvasCoord = this.coord.toCanvasCoord()
-
-    this.sprite.draw(canvasCoord.x, canvasCoord.y)
+    this.sprite.draw(this.coord)
   }
 }
 
 export class EmptySpace extends Point {
   /**
-   * @param {Coord} coord
+   * @param {GridCoord} coord
    */
   constructor (coord) {
     super(coord, new EmptySprite())
@@ -77,9 +85,9 @@ export class EmptySpace extends Point {
 
 export class Entity extends Point {
   /**
-   * @param {Sprite} sprite
+   * @param {SpriteSegment} sprite
    * @param {Player} [owner]
-   * @param {Coord} [coord]
+   * @param {GridCoord} [coord]
    */
   constructor (sprite, owner, coord) {
     super(coord, sprite)
@@ -87,12 +95,16 @@ export class Entity extends Point {
      * @type {Player|System}
      */
     this.owner = owner || System
+    /**
+     * @type {String}
+     */
+    this.angle = 'up'
 
     this.grid.set(this)
   }
 
   /**
-   * @param {Game.Direction|Coord} direction
+   * @param {Keys.Direction|GridCoord} direction
    * @param {Boolean} [copy]
    *
    * @fires Game.Events.BUMP
@@ -103,7 +115,7 @@ export class Entity extends Point {
   move (direction, copy) {
     let coord
 
-    if (direction instanceof Coord) {
+    if (direction instanceof GridCoord) {
       coord = direction
     } else {
       let x = this.coord.x + direction.movement[0]
@@ -115,7 +127,8 @@ export class Entity extends Point {
       if (y < 0) y = (this.grid.height - 1)
       if (y > (this.grid.height - 1)) y = 0
 
-      coord = new Coord(x, y)
+      coord = new GridCoord(x, y)
+      this.angle = direction.name
     }
 
     if (Entity.exists(coord) && Entity.isNotFood(coord)) {
@@ -123,7 +136,7 @@ export class Entity extends Point {
         player: this.owner,
         entity: this.grid.get(coord)
       })
-    } else if (Config.grid.get(coord) instanceof Food) {
+    } else if (Config.gridInstance.get(coord) instanceof Food) {
       Utils.emit(Game.Events.EAT_FOOD, {
         player: this.owner
       })
@@ -133,39 +146,55 @@ export class Entity extends Point {
   }
 
   /**
-   * @param {Coord} coord
-   * @returns {Boolean}
+   * @returns {Object}
    */
-  static exists (coord) {
-    return Config.grid.get(coord) instanceof Entity
+  nearby () {
+    const grid = Config.gridInstance
+    const x = this.coord.x
+    const y = this.coord.y
+
+    return {
+      right: grid.get(new Coord(x + 1, y)),
+      left: grid.get(new Coord(x - 1, y)),
+      up: grid.get(new Coord(x, y + 1)),
+      down: grid.get(new Coord(x, y - 1))
+    }
   }
 
   /**
-   * @param {Coord} coord
+   * @param {GridCoord} coord
+   * @returns {Boolean}
+   */
+  static exists (coord) {
+    return Config.gridInstance.get(coord) instanceof Entity
+  }
+
+  /**
+   * @param {GridCoord} coord
    * @returns {Boolean}
    */
   static isNotFood (coord) {
-    return !(Config.grid.get(coord) instanceof Food)
+    return !(Config.gridInstance.get(coord) instanceof Food)
   }
 }
 
 export class Food extends Entity {
   /**
-   * @param {Coord} [coord]
+   * @param {GridCoord} [coord]
    */
   constructor (coord) {
     super(new FoodSprite(), null, coord)
   }
 
   reset () {
-    this.move(Coord.random())
+    this.move(GridCoord.random())
   }
 }
 
 export class SnakePiece extends Entity {
   /**
    * @param {Player} owner
-   * @param {Coord} [coord]
+   * @param {GridCoord} [coord]
    */
   constructor (owner, coord) {
     super(new SnakeSprite(), owner, coord)
@@ -175,7 +204,7 @@ export class SnakePiece extends Entity {
 export class Snake extends Set {
   /**
    * @param {Player} owner
-   * @param {Coord} [coord]
+   * @param {GridCoord} [coord]
    */
   constructor (owner, coord) {
     super()
@@ -192,44 +221,72 @@ export class Snake extends Set {
     this.add(new SnakePiece(owner, coord)).move(new Keys.DirectionUp())
   }
 
-  /**
-   * @returns {SnakePiece}
-   */
-  get head () {
-    return this.getNum(this.size)
+  rearrangeSprites () {
+    for (let piece of this.values()) {
+      piece.sprite = SnakeBodySprite[piece.angle]()
+    }
+    this.head.sprite = SnakeHeadSprite[this.head.angle]()
+    this.tail.sprite = SnakeTailSprite[this.tail.angle]()
   }
 
   /**
-   * @returns {SnakePiece}
+   * @param {SnakePiece} item
+   * @returns {Snake}
    */
-  get tail () {
-    return this.getNum(0)
+  add (item) {
+    Assert.instance(item, SnakePiece)
+    super.add(item)
+
+    this.rearrangeSprites()
+
+    return this
   }
 
   /**
    * @param {Number} index
    * @returns {SnakePiece}
    */
-  getNum (index) {
-    return Array.from(this.entries())[index]
+  get (index) {
+    return Array.from(this.values())[index]
   }
 
   /**
-   * @param {Coord|Keys.Direction} direction
+   * @returns {SnakePiece}
+   */
+  get head () {
+    return this.get(0)
+  }
+
+  /**
+   * @returns {SnakePiece}
+   */
+  get tail () {
+    return this.get(this.size - 1)
+  }
+
+  /**
+   * @param {GridCoord|Keys.Direction} direction
    * @returns {Snake}
    */
   move (direction) {
     let prevDirection = direction
+    let prevAngle = this.head.angle
 
     this.forEach(piece => {
-      let tmpPrevCoord = piece.coord
+      let currentCoord = piece.coord
+      let currentAngle = piece.angle
+      piece.angle = prevAngle
       piece.move(prevDirection)
-      prevDirection = tmpPrevCoord
+      prevDirection = currentCoord
+      prevAngle = currentAngle
     })
 
     if (this.maxSize > this.size) {
-      this.add(new SnakePiece(this.owner, prevDirection))
+      let newPiece = new SnakePiece(this.owner, prevDirection)
+      this.add(newPiece)
     }
+
+    this.rearrangeSprites()
 
     return this
   }

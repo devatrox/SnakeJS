@@ -1,33 +1,18 @@
-import Game from './game.js'
 import * as Utils from './utilities.js'
+import Assert from './assert.js'
+import Game from './game.js'
 import { Config } from './bootstrap.js'
 import Grid from './grid.js'
 
 export default class View {
   /**
    * @param {String} elementId
-   * @param {Number} [width=640]
-   * @param {Number} [height=480]
-   * @param {Number} [scale]
    */
-  constructor (elementId, width = 640, height = 480, scale = 1) {
-    Config.view = this
+  constructor (elementId) {
     /**
-     * @type {Element}
+     * @type {String}
      */
-    this.element = document.getElementById(elementId)
-    /**
-     * @type {Number}
-     */
-    this.width = width
-    /**
-     * @type {Number}
-     */
-    this.height = height
-    /**
-     * @type {Number}
-     */
-    this.scale = scale
+    this.elementId = elementId
     /**
      * @type {Number}
      */
@@ -39,10 +24,6 @@ export default class View {
 
     this.element.appendChild(this.canvas)
 
-    this.canvas.width = this.width
-    this.canvas.height = this.height
-    this.canvas.scale = this.scale
-
     this.draw()
   }
 
@@ -50,7 +31,12 @@ export default class View {
    * @param {HTMLCanvasElement} canvasElement
    */
   set canvas (canvasElement) {
-    Utils.assertIsInstanceOf(canvasElement, HTMLCanvasElement)
+    Assert.instance(canvasElement, HTMLCanvasElement)
+
+    canvasElement.width = Config.width
+    canvasElement.height = Config.height
+    canvasElement.scale = Config.canvasScale
+
     this._canvas = canvasElement
   }
 
@@ -69,65 +55,45 @@ export default class View {
   }
 
   /**
-   * @param {Number} width
+   * @returns {Element}
    */
-  set width (width) {
-    Utils.assertIsOfType(width, 'number')
-    this._width = width
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get width () {
-    return this._width
+  get element () {
+    let element = document.getElementById(this.elementId)
+    Assert.exists(element)
+    Assert.instance(element, HTMLElement)
+    return element
   }
 
   /**
    * @returns {Number}
    */
   get gameWidth () {
-    return this.width
-  }
-
-  /**
-   * @param {Number} height
-   */
-  set height (height) {
-    Utils.assertIsOfType(height, 'number')
-    this._height = height
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get height () {
-    return this._height
+    return Config.width
   }
 
   /**
    * @returns {Number}
    */
   get gameHeight () {
-    return this.height - this.uiHeight
+    return Config.height - this.uiHeight
   }
 
   draw () {
     this.drawUi()
 
     this.context.fillStyle = Game.Color.BACKGROUND
-    this.context.fillRect(0, this.uiHeight, this.width, this.height - this.uiHeight)
+    this.context.fillRect(0, this.uiHeight, Config.width, Config.height - this.uiHeight)
   }
 
   drawUi () {
     this.context.fillStyle = Game.Color.UI
-    this.context.fillRect(0, 0, this.width, this.uiHeight)
+    this.context.fillRect(0, 0, Config.width, this.uiHeight)
   }
 
   drawScore () {
     this.drawUi()
 
-    let players = Array.from(Config.game.players)
+    let players = Array.from(Config.gameInstance.players)
 
     let scores = players.map(player => `${player.username}: ${player.score.current}`)
 

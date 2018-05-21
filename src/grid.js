@@ -1,59 +1,37 @@
 import * as Utils from './utilities.js'
+import Assert from './assert.js'
 import { Config } from './bootstrap.js'
+import { GridCoord } from './coords.js'
 import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'
 import View from './view.js'
 
 export default class Grid {
-  constructor (cellSize) {
-    Config.grid = this
-    /**
-     * @type {View}
-     */
-    this.view = Config.view
-    /**
-     * @type {Number}
-     */
-    this.cellSize = cellSize
-    /**
-     * @type {Array[]}
-     */
-    this.values = this.create()
-  }
-
   /**
-   * @param {Number} cellSize
+   * @returns {View}
    */
-  set cellSize (cellSize) {
-    Utils.assertIsOfType(cellSize, 'number')
-    this._cellSize = cellSize
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get cellSize () {
-    return this._cellSize
+  get view () {
+    return Config.viewInstance
   }
 
   /**
    * @returns {Number}
    */
   get width () {
-    return this.view.gameWidth / this.cellSize
+    return this.view.gameWidth / Config.gridScale
   }
 
   /**
    * @returns {Number}
    */
   get height () {
-    return this.view.gameHeight / this.cellSize
+    return this.view.gameHeight / Config.gridScale
   }
 
   /**
    * @param {Array[]} values
    */
   set values (values) {
-    Utils.assert(Array.isArray(values), 'Grid.values is not an array')
+    Assert.array(values)
     this._values = values
   }
 
@@ -61,24 +39,26 @@ export default class Grid {
    * @returns {Array[]}
    */
   get values () {
-    return this._values
+    return this._values || [[]]
   }
 
   /**
    * @returns {Array[]}
    */
-  create () {
+  createGrid () {
     let horizontal = _.range(0, this.width)
     let vertical = _.range(0, this.height)
 
-    return vertical.map(y => horizontal.map(x => {
-      let coord = new Coord(x, y)
+    this.values = vertical.map(y => horizontal.map(x => {
+      let coord = new GridCoord(x, y)
       return new EmptySpace(coord)
     }))
+
+    return Promise.all(this.values)
   }
 
   /**
-   * @param {Coord} coord
+   * @param {GridCoord} coord
    * @returns {Point}
    */
   get (coord) {
@@ -91,6 +71,7 @@ export default class Grid {
    * @returns {Grid}
    */
   set (point) {
+    Assert.instance(point, Point)
     let { x, y } = point.coord
     point.draw()
 
@@ -104,6 +85,7 @@ export default class Grid {
    * @returns {Grid}
    */
   delete (point) {
+    Assert.instance(point, Point)
     let empty = new EmptySpace(point.coord)
 
     this.set(empty)
@@ -113,7 +95,7 @@ export default class Grid {
 
   /**
    * @param {Point} point
-   * @param {Coord} coord
+   * @param {GridCoord} coord
    * @param {Boolean} [copy]
    * @returns {Grid}
    */
@@ -125,88 +107,5 @@ export default class Grid {
     this.set(point)
 
     return this
-  }
-}
-
-export class Coord {
-  /**
-   * @param {Number} x
-   * @param {Number} y
-   */
-  constructor (x, y) {
-    /**
-     * @type {Number}
-     */
-    this.x = x
-    /**
-     * @type {Number}
-     */
-    this.y = y
-  }
-
-  /**
-   * @param {Number} num
-   */
-  set x (num) {
-    Utils.assertIsOfType(num, 'number')
-    this._x = num
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get x () {
-    return this._x
-  }
-
-  /**
-   * @param {Number} num
-   */
-  set y (num) {
-    Utils.assertIsOfType(num, 'number')
-    this._y = num
-  }
-
-  /**
-   * @returns {Number}
-   */
-  get y () {
-    return this._y
-  }
-
-  /**
-   * @returns {Number[]}
-   */
-  get toArray () {
-    return [this.x, this.y]
-  }
-
-  /**
-   * @returns {Coord}
-   */
-  toCanvasCoord () {
-    let view = Config.view
-    let grid = Config.grid
-    let x = (this.x * grid.cellSize)
-    let y = (this.y * grid.cellSize) + view.uiHeight
-    let canvasCoord = new Coord(x, y)
-
-    return canvasCoord
-  }
-
-  /**
-   * @returns {Coord}
-   */
-  static random () {
-    let x = _.random(2, (Config.grid.width - 2))
-    let y = _.random(2, (Config.grid.height - 2))
-
-    let coord = new Coord(x, y)
-
-    if (Entity.exists(coord)) {
-      return Coord.random()
-    }
-
-    return coord
   }
 }

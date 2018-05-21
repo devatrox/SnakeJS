@@ -1,4 +1,5 @@
 import * as Utils from './utilities.js'
+import Assert from './assert.js'
 import Game from './game.js'
 import { Config } from './bootstrap.js'
 import { Snake, Entity, Food } from './elements.js'
@@ -21,6 +22,7 @@ export class Players extends Set {
    * @returns {Players}
    */
   add (username) {
+    Assert.string(username)
     if (this.size === this.maxPlayers) return
 
     let player = new Player(username)
@@ -40,18 +42,18 @@ export class Players extends Set {
    * @returns {Players}
    */
   delete (player) {
+    Assert.instance(player)
     super.delete(player)
 
     return this
   }
 
   /**
-   * @param {Number} num
+   * @param {Number} index
    * @returns {Player}
    */
-  get (num) {
-    let player = Array.from(this.entries())[num]
-    return super.get(player)
+  get (index) {
+    return Array.from(this.values())[index]
   }
 }
 
@@ -84,7 +86,7 @@ export default class Player {
    * @param {Keys.KeySet} keySet
    */
   set keySet (keySet) {
-    Utils.assertIsInstanceOf(keySet, Keys.KeySet)
+    Assert.instance(keySet, Keys.KeySet)
     this._keySet = keySet
   }
 
@@ -99,7 +101,7 @@ export default class Player {
    * @param {Keys.DirectionKey} key
    */
   set currentDirectionKey (key) {
-    Utils.assertIsInstanceOf(key, Keys.DirectionKey)
+    Assert.instance(key, Keys.DirectionKey)
     this._currentDirectionKey = key
   }
 
@@ -115,6 +117,7 @@ export default class Player {
    * @fires Game.Events.PLAYER_LOST
    */
   set lives (lives) {
+    Assert.number(lives)
     if (lives <= 0) {
       Utils.emit(Game.Events.PLAYER_LOST, {
         player: this
@@ -134,16 +137,17 @@ export default class Player {
    * @param {{cb: (event: Event, key: Keys.DirectionKey)}} cb
    */
   set onArrowKeyPress (cb) {
-    window.addEventListener('keydown', _.debounce(e => {
+    Assert.function(cb)
+    Utils.listen('keydown', _.debounce(e => {
       if (!this.keySet) return
-      if (!Config.game.isRunning) return
+      if (!Config.gameInstance.isRunning) return
 
       if (this.keySet.has(e.key)) {
         let key = this.keySet.get(e.key)
 
         cb(e, key)
       }
-    }, 50), false)
+    }, 50))
   }
 
   /**
@@ -153,6 +157,7 @@ export default class Player {
    * @returns {Boolean}
    */
   isTrying180 (key) {
+    Assert.instance(key, Keys.DirectionKey)
     return key.keyName === this.currentDirectionKey.opposite.keyName
   }
 
@@ -191,6 +196,7 @@ export class Score {
    * @fires Game.Events.BUMPED_SCORE
    */
   set current (score) {
+    Assert.number(score)
     if (score > this.maxScore) {
       return Utils.emit(Game.Events.MAX_SCORE, {
         player: this.owner
