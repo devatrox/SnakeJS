@@ -30,7 +30,7 @@ export function notify (...message) {
 
 /**
  * @param {String} name
- * @param {function(CustomEvent)} cb
+ * @param {function(Event)} cb
  * @param {EventTarget} [target]
  */
 export function listen (name, cb, target = window) {
@@ -45,6 +45,7 @@ export function listen (name, cb, target = window) {
  * @param {String} name
  * @param {Object} details
  * @param {EventTarget} [target]
+ * @return {CustomEvent}
  */
 export function emit (name, details = {}, target = window) {
   Assert.string(name)
@@ -55,4 +56,6 @@ export function emit (name, details = {}, target = window) {
     detail: details
   })
   target.dispatchEvent(event)
+
+  return event
 }

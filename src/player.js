@@ -19,7 +19,7 @@ export class Players extends Set {
   /**
    * @param {String} value
    * @fires Game.Events.PLAYER_JOINED
-   * @returns {Players}
+   * @returns {this}
    */
   add (value) {
     Assert.string(value)
@@ -28,24 +28,20 @@ export class Players extends Set {
     let player = new Player(value)
     player.keySet = Keys.keySets[this.size]
 
-    super.add(player)
-
     Utils.emit(Game.Events.PLAYER_JOINED, {
       player: player
     })
 
-    return this
+    return super.add(player)
   }
 
   /**
    * @param {Player} player
-   * @returns {Players}
+   * @returns {Boolean}
    */
   delete (player) {
-    Assert.instance(player)
-    super.delete(player)
-
-    return this
+    Assert.instance(player, Player)
+    return super.delete(player)
   }
 
   /**
@@ -57,8 +53,13 @@ export class Players extends Set {
   }
 }
 
-export const System = {
-  username: 'system'
+export class System {
+  constructor () {
+    /**
+     * @type {String}
+     */
+    this.username = 'system'
+  }
 }
 
 export default class Player {
@@ -134,7 +135,7 @@ export default class Player {
   }
 
   /**
-   * @param {function(Event, Keys.DirectionKey)} cb
+   * @param {function(KeyboardEvent, Keys.DirectionKey)} cb
    */
   set onArrowKeyPress (cb) {
     Assert.function(cb)
@@ -198,7 +199,7 @@ export class Score {
   set current (score) {
     Assert.number(score)
     if (score > this.maxScore) {
-      return Utils.emit(Game.Events.MAX_SCORE, {
+      Utils.emit(Game.Events.MAX_SCORE, {
         player: this.owner
       })
     }

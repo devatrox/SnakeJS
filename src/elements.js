@@ -95,7 +95,7 @@ export class Entity extends Point {
     /**
      * @type {Player|System}
      */
-    this.owner = owner || System
+    this.owner = owner || new System()
     /**
      * @type {String}
      */
@@ -236,7 +236,7 @@ export class Snake extends Set {
 
   /**
    * @param {SnakePiece} item
-   * @returns {Snake}
+   * @returns {this}
    */
   add (item) {
     Assert.instance(item, SnakePiece)

@@ -26,6 +26,21 @@ export default class Game {
   }
 
   /**
+   * @param {Food} food
+   */
+  set food (food) {
+    Assert.instance(food, Food)
+    this._food = food
+  }
+
+  /**
+   * @returns {Food}
+   */
+  get food () {
+    return this._food
+  }
+
+  /**
    * @returns {Grid}
    */
   get grid () {
@@ -56,7 +71,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Player)} cb
+   * @param {function(CustomEvent, Player)} cb
    */
   set onMaxScore (cb) {
     Assert.function(cb)
@@ -64,7 +79,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Player)} cb
+   * @param {function(CustomEvent, Player)} cb
    */
   set onBumpScore (cb) {
     Assert.function(cb)
@@ -72,7 +87,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Player)} cb
+   * @param {function(CustomEvent, Player)} cb
    */
   set onPlayerJoined (cb) {
     Assert.function(cb)
@@ -80,7 +95,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Player)} cb
+   * @param {function(CustomEvent, Player)} cb
    */
   set onPlayerLost (cb) {
     Assert.function(cb)
@@ -88,7 +103,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Player)} cb
+   * @param {function(CustomEvent, Player)} cb
    */
   set onEatFood (cb) {
     Assert.function(cb)
@@ -96,7 +111,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Player, Entity)} cb
+   * @param {function(CustomEvent, Player, Entity)} cb
    */
   set onBump (cb) {
     Assert.function(cb)
@@ -104,7 +119,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Number)} cb
+   * @param {function(CustomEvent, Number)} cb
    */
   set onPlay (cb) {
     Assert.function(cb)
@@ -112,7 +127,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, ?String)} cb
+   * @param {function(CustomEvent, ?String)} cb
    */
   set onPause (cb) {
     Assert.function(cb)
@@ -120,7 +135,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Keys.EscapeKey)} cb
+   * @param {function(KeyboardEvent, Keys.EscapeKey)} cb
    */
   set onEscapeKeyPress (cb) {
     Assert.function(cb)
@@ -132,7 +147,7 @@ export default class Game {
   }
 
   /**
-   * @param {function(Event, Keys.EnterKey)} cb
+   * @param {function(KeyboardEvent, Keys.EnterKey)} cb
    */
   set onEnterKeyPress (cb) {
     Assert.function(cb)

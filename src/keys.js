@@ -1,3 +1,5 @@
+import Assert from './tools/Assert.js'
+
 export class Direction {
   constructor (movement) {
     /**
@@ -79,15 +81,10 @@ export class EscapeKey extends Key {
 export class DirectionKey extends Key {
   /**
    * @param {String} keyName
-   * @param {DirectionKey} opposite
    * @param {Direction} direction
    */
-  constructor (keyName, opposite, direction) {
+  constructor (keyName, direction) {
     super(keyName)
-    /**
-     * @type {DirectionKey}
-     */
-    this.opposite = opposite
     /**
      * @type {Direction}
      */
@@ -95,9 +92,25 @@ export class DirectionKey extends Key {
   }
 
   /**
+   * @param {Direction} direction
+   */
+  set direction (direction) {
+    Assert.instance(direction, Direction)
+    this._direction = direction
+  }
+
+  /**
+   * @returns {Direction}
+   */
+  get direction () {
+    return this._direction
+  }
+
+  /**
    * @param {DirectionKey} key
    */
   set opposite (key) {
+    Assert.instance(key, DirectionKey)
     this._opposite = key
   }
 
@@ -111,25 +124,25 @@ export class DirectionKey extends Key {
 
 export class Left extends DirectionKey {
   constructor (key) {
-    super(key, Right, DirectionLeft)
+    super(key, DirectionLeft)
   }
 }
 
 export class Right extends DirectionKey {
   constructor (key) {
-    super(key, Left, DirectionRight)
+    super(key, DirectionRight)
   }
 }
 
 export class Up extends DirectionKey {
   constructor (key) {
-    super(key, Down, DirectionUp)
+    super(key, DirectionUp)
   }
 }
 
 export class Down extends DirectionKey {
   constructor (key) {
-    super(key, Up, DirectionDown)
+    super(key, DirectionDown)
   }
 }
 

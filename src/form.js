@@ -1,5 +1,6 @@
 import * as Utils from './tools/utilities.js'
 import { Config } from './bootstrap.js'
+import Game from './game.js'
 
 export default class Form {
   constructor () {
