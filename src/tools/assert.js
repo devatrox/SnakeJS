@@ -63,7 +63,7 @@ export default class Assert {
 
   /**
    * @param {*} thing
-   * @param {Assert.Types|String} type
+   * @param {(Assert.Types|String)} type
    * @returns {Assert}
    * @throws {Error}
    */

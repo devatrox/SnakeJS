@@ -2,14 +2,14 @@
   "name": "snake-js",
   "version": "1.0.0",
   "description": "",
-  "main": "src/game.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "npx http-server",
     "lint": "eslint ."
   },
   "author": "Jason Nickel <mail@jasonnickel.de>",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash-es": "^4.17.0",
     "eslint": "^4.6.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.7.0",

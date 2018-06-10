@@ -1,9 +1,15 @@
-import * as Utils from './utilities.js'
+import * as Utils from './tools/utilities.js'
 import { Config } from './bootstrap.js'
 
 export default class Form {
   constructor () {
+    /**
+     * @type {HTMLInputElement}
+     */
     this.usernameInput = document.getElementById('username')
+    /**
+     * @type {HTMLButtonElement}
+     */
     this.startBtn = document.getElementById('start')
 
     if (Config.debug) {

@@ -1,5 +1,5 @@
-import * as Utils from './utilities.js'
-import Assert from './assert.js'
+import * as Utils from './tools/utilities.js'
+import Assert from './tools/assert.js'
 import Game from './game.js'
 import { Config } from './bootstrap.js'
 import { Snake, Entity, Food } from './elements.js'
@@ -17,15 +17,15 @@ export class Players extends Set {
     this.maxPlayers = maxPlayers
   }
   /**
-   * @param {String} username
+   * @param {String} value
    * @fires Game.Events.PLAYER_JOINED
    * @returns {Players}
    */
-  add (username) {
-    Assert.string(username)
+  add (value) {
+    Assert.string(value)
     if (this.size === this.maxPlayers) return
 
-    let player = new Player(username)
+    let player = new Player(value)
     player.keySet = Keys.keySets[this.size]
 
     super.add(player)
@@ -134,7 +134,7 @@ export default class Player {
   }
 
   /**
-   * @param {{cb: (event: Event, key: Keys.DirectionKey)}} cb
+   * @param {function(Event, Keys.DirectionKey)} cb
    */
   set onArrowKeyPress (cb) {
     Assert.function(cb)

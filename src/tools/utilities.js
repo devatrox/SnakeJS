@@ -1,4 +1,4 @@
-import { Config } from './bootstrap.js'
+import { Config } from '../bootstrap.js'
 import Assert from './assert.js'
 
 /**
@@ -13,28 +13,24 @@ export function delay (seconds) {
 }
 
 /**
- * @param {String} message
+ * @param {*[]} message
  * @returns {String}
  */
 export function notify (...message) {
+  let joinedMessage = (message).join(' ')
+
   if (Config.notify === 'console') {
     console.info(...message)
   } else if (Config.notify === 'notification') {
-    message = (message).join(' ')
-    if (Notification.permission === 'granted') {
-      // eslint-disable-next-line no-new
-      new Notification(message)
-    } else if (Notification.permission !== 'denied') {
-      Notification.requestPermission().then(() => new Notification(message))
-    }
+    Notification.requestPermission().then(() => new Notification(joinedMessage))
   }
 
-  return message
+  return joinedMessage
 }
 
 /**
  * @param {String} name
- * @param {Function} cb
+ * @param {function(CustomEvent)} cb
  * @param {EventTarget} [target]
  */
 export function listen (name, cb, target = window) {

@@ -1,8 +1,9 @@
-import * as Utils from './utilities.js'
-import Assert from './assert.js'
+import * as Utils from './tools/utilities.js'
+import Assert from './tools/assert.js'
 import Game from './game.js'
 import { Config } from './bootstrap.js'
 import Grid from './grid.js'
+import View from './view.js'
 import { SpriteCoord, GridCoord, Coord } from './coords.js'
 import * as Keys from './keys.js'
 import { SpriteSegment, EmptySprite, FoodSprite, SnakeSprite, SnakeHeadSprite, SnakeTailSprite, SnakeBodySprite } from './sprite.js'
@@ -121,7 +122,7 @@ export class Entity extends Point {
       let x = this.coord.x + direction.movement[0]
       let y = this.coord.y + direction.movement[1]
 
-      // If snake is out of bounds, come out of opposite side
+      // * If snake is out of bounds, come out of opposite side
       if (x < 0) x = (this.grid.width - 1)
       if (x > (this.grid.width - 1)) x = 0
       if (y < 0) y = (this.grid.height - 1)
@@ -132,10 +133,12 @@ export class Entity extends Point {
     }
 
     if (Entity.exists(coord) && Entity.isNotFood(coord)) {
-      return Utils.emit(Game.Events.BUMP, {
+      Utils.emit(Game.Events.BUMP, {
         player: this.owner,
         entity: this.grid.get(coord)
       })
+
+      return this
     } else if (Config.gridInstance.get(coord) instanceof Food) {
       Utils.emit(Game.Events.EAT_FOOD, {
         player: this.owner
@@ -143,6 +146,8 @@ export class Entity extends Point {
     }
 
     this.grid.move(this, coord, copy)
+
+    return this
   }
 
   /**

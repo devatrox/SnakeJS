@@ -1,5 +1,5 @@
-import * as Utils from './utilities.js'
-import Assert from './assert.js'
+import * as Utils from './tools/utilities.js'
+import Assert from './tools/assert.js'
 import { Config } from './bootstrap.js'
 import { GridCoord } from './coords.js'
 import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'

@@ -1,5 +1,5 @@
-import * as Utils from './utilities.js'
-import Assert from './assert.js'
+import * as Utils from './tools/utilities.js'
+import Assert from './tools/assert.js'
 import View from './view.js'
 import Grid from './grid.js'
 import { Snake, Entity, Food } from './elements.js'
@@ -8,10 +8,7 @@ import * as Keys from './keys.js'
 import Player, { Players, Score } from './player.js'
 
 export default class Game {
-  /**
-   * @param {String} elementId
-   */
-  constructor (elementId) {
+  constructor () {
     /**
      * @type {Boolean}
      */
@@ -59,7 +56,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, player: Player)}} cb
+   * @param {function(Event, Player)} cb
    */
   set onMaxScore (cb) {
     Assert.function(cb)
@@ -67,7 +64,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, player: Player)}} cb
+   * @param {function(Event, Player)} cb
    */
   set onBumpScore (cb) {
     Assert.function(cb)
@@ -75,7 +72,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, player: Player)}} cb
+   * @param {function(Event, Player)} cb
    */
   set onPlayerJoined (cb) {
     Assert.function(cb)
@@ -83,7 +80,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, player: Player)}} cb
+   * @param {function(Event, Player)} cb
    */
   set onPlayerLost (cb) {
     Assert.function(cb)
@@ -91,7 +88,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, player: Player)}} cb
+   * @param {function(Event, Player)} cb
    */
   set onEatFood (cb) {
     Assert.function(cb)
@@ -99,7 +96,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, player: Player, entity: Entity)}} cb
+   * @param {function(Event, Player, Entity)} cb
    */
   set onBump (cb) {
     Assert.function(cb)
@@ -107,7 +104,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, delay: Number)}} cb
+   * @param {function(Event, Number)} cb
    */
   set onPlay (cb) {
     Assert.function(cb)
@@ -115,7 +112,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, reason: ?String)}} cb
+   * @param {function(Event, ?String)} cb
    */
   set onPause (cb) {
     Assert.function(cb)
@@ -123,7 +120,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, key: Keys.EscapeKey)}} cb
+   * @param {function(Event, Keys.EscapeKey)} cb
    */
   set onEscapeKeyPress (cb) {
     Assert.function(cb)
@@ -135,7 +132,7 @@ export default class Game {
   }
 
   /**
-   * @param {{cb: (event: Event, key: Keys.EnterKey)}} cb
+   * @param {function(Event, Keys.EnterKey)} cb
    */
   set onEnterKeyPress (cb) {
     Assert.function(cb)

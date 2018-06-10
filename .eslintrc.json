@@ -20,7 +20,7 @@
         "newIsCap": false
       }
     ],
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
     "valid-jsdoc": [
       "warn",
       {

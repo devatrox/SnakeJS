@@ -1,5 +1,5 @@
 import { Sprite } from './sprite.js'
-import Assert from './assert.js'
+import Assert from './tools/assert.js'
 import View from './view.js'
 import Grid from './grid.js'
 import Game from './game.js'

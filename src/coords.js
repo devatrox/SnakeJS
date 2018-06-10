@@ -1,4 +1,4 @@
-import Assert from './assert.js'
+import Assert from './tools/assert.js'
 import { Config } from './bootstrap.js'
 import { Entity } from './elements.js'
 
@@ -96,7 +96,7 @@ export class CanvasCoord extends Coord {
     let scale = Config.gridScale
     let [x, y] = this.toScaledArray(scale)
 
-    return new GridCoord(x, y, scale)
+    return new GridCoord(x, y)
   }
 }
 
@@ -113,7 +113,7 @@ export class SpriteCoord extends Coord {
     let scale = Config.canvasScale
     let [x, y] = this.toScaledArray(scale)
 
-    return new CanvasCoord(x, y, scale)
+    return new CanvasCoord(x, y)
   }
 }
 
@@ -149,6 +149,6 @@ export class GridCoord extends Coord {
 
     y = y + Config.viewInstance.uiHeight
 
-    return new CanvasCoord(x, y, scale)
+    return new CanvasCoord(x, y)
   }
 }

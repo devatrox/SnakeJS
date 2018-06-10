@@ -1,5 +1,5 @@
-import * as Utils from './utilities.js'
-import Assert from './assert.js'
+import * as Utils from './tools/utilities.js'
+import Assert from './tools/assert.js'
 import Game from './game.js'
 import { Config } from './bootstrap.js'
 import Grid from './grid.js'
@@ -35,7 +35,6 @@ export default class View {
 
     canvasElement.width = Config.width
     canvasElement.height = Config.height
-    canvasElement.scale = Config.canvasScale
 
     this._canvas = canvasElement
   }
