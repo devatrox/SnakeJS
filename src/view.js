@@ -1,8 +1,6 @@
-import * as Utils from './tools/utilities.js'
-import Assert from './tools/assert.js'
-import Game from './game.js'
+import Assert from './tools/Assert.js'
+import Game from './Game.js'
 import { Config } from './bootstrap.js'
-import Grid from './grid.js'
 
 export default class View {
   /**

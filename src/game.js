@@ -1,11 +1,13 @@
 import * as Utils from './tools/utilities.js'
-import Assert from './tools/assert.js'
-import View from './view.js'
-import Grid from './grid.js'
+import Assert from './tools/Assert.js'
+import View from './View.js'
+import Grid from './Grid.js'
 import { Snake, Entity, Food } from './elements.js'
 import { Config } from './bootstrap.js'
 import * as Keys from './keys.js'
-import Player, { Players, Score } from './player.js'
+import Players from './Players.js'
+import Score from './Score.js'
+import Player from './Player.js'
 
 export default class Game {
   constructor () {

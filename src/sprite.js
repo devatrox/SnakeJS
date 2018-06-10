@@ -1,10 +1,9 @@
-import * as Utils from './tools/utilities.js'
-import Assert from './tools/assert.js'
-import Game from './game.js'
+import Assert from './tools/Assert.js'
+import Game from './Game.js'
 import { Config } from './bootstrap.js'
-import Grid from './grid.js'
-import { SpriteCoord, GridCoord } from './coords.js'
-import View from './view.js'
+import GridCoord from './coords/GridCoord.js'
+import SpriteCoord from './coords/SpriteCoord.js'
+import View from './View.js'
 
 export class Sprite {
   constructor () {

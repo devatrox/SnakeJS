@@ -1,5 +1,5 @@
-import { Config } from '../bootstrap.js'
-import Assert from './Assert.js'
+import { Config } from './bootstrap.js'
+import Assert from './tools/Assert.js'
 
 /**
  * @param {Number} seconds
@@ -13,24 +13,28 @@ export function delay (seconds) {
 }
 
 /**
- * @param {*[]} message
+ * @param {String} message
  * @returns {String}
  */
 export function notify (...message) {
-  let joinedMessage = (message).join(' ')
-
   if (Config.notify === 'console') {
     console.info(...message)
   } else if (Config.notify === 'notification') {
-    Notification.requestPermission().then(() => new Notification(joinedMessage))
+    message = (message).join(' ')
+    if (Notification.permission === 'granted') {
+      // eslint-disable-next-line no-new
+      new Notification(message)
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(() => new Notification(message))
+    }
   }
 
-  return joinedMessage
+  return message
 }
 
 /**
  * @param {String} name
- * @param {function(Event)} cb
+ * @param {Function} cb
  * @param {EventTarget} [target]
  */
 export function listen (name, cb, target = window) {
@@ -45,7 +49,6 @@ export function listen (name, cb, target = window) {
  * @param {String} name
  * @param {Object} details
  * @param {EventTarget} [target]
- * @return {CustomEvent}
  */
 export function emit (name, details = {}, target = window) {
   Assert.string(name)
@@ -56,6 +59,4 @@ export function emit (name, details = {}, target = window) {
     detail: details
   })
   target.dispatchEvent(event)
-
-  return event
 }

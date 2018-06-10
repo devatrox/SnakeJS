@@ -1,9 +1,9 @@
 import { Sprite } from './sprite.js'
-import Assert from './tools/assert.js'
-import View from './view.js'
-import Grid from './grid.js'
-import Game from './game.js'
-import Form from './form.js'
+import Assert from './tools/Assert.js'
+import View from './View.js'
+import Grid from './Grid.js'
+import Game from './Game.js'
+import Form from './Form.js'
 import { Food } from './elements.js'
 
 /**

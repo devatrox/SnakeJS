@@ -1,9 +1,8 @@
-import * as Utils from './tools/utilities.js'
-import Assert from './tools/assert.js'
+import Assert from './tools/Assert.js'
 import { Config } from './bootstrap.js'
-import { GridCoord } from './coords.js'
+import GridCoord from './coords/GridCoord.js'
 import { EmptySpace, Point, Entity, Food, SnakePiece } from './elements.js'
-import View from './view.js'
+import View from './View.js'
 
 export default class Grid {
   /**
