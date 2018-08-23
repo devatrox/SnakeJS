@@ -21,8 +21,6 @@ export default class View {
     this.canvas = document.createElement('canvas')
 
     this.element.appendChild(this.canvas)
-
-    this.draw()
   }
 
   /**

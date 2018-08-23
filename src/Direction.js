@@ -1,5 +1,11 @@
-export class Direction {
-  constructor (movement) {
+import Assert from './tools/Assert.js'
+
+export default class Direction {
+  /**
+   * @param {Number[]} movement
+   * @param {String} name
+   */
+  constructor (movement, name = 'up') {
     /**
      * @type {Number[]}
      */
@@ -7,50 +13,67 @@ export class Direction {
     /**
      * @type {String}
      */
-    this.name = 'up'
+    this.name = name
   }
-}
 
-export class DirectionLeft extends Direction {
-  constructor () {
-    super([-1, 0])
+  /**
+   * @param {Number[]} movement
+   */
+  set movement (movement) {
+    Assert.array(movement)
+    Assert.true(movement.length = 2)
+    Assert.number(movement[0])
+    Assert.number(movement[1])
 
-    /**
-     * @type {String}
-     */
-    this.name = 'left'
+    this._movement = movement
   }
-}
 
-export class DirectionRight extends Direction {
-  constructor () {
-    super([1, 0])
-
-    /**
-     * @type {String}
-     */
-    this.name = 'right'
+  /**
+   * @returns {Number[]}
+   */
+  get movement () {
+    return this._movement
   }
-}
 
-export class DirectionUp extends Direction {
-  constructor () {
-    super([0, -1])
-
-    /**
-     * @type {String}
-     */
-    this.name = 'up'
+  /**
+   * @returns {Number}
+   */
+  get x () {
+    return this._movement[0]
   }
-}
 
-export class DirectionDown extends Direction {
-  constructor () {
-    super([0, 1])
+  /**
+   * @returns {Number}
+   */
+  get y () {
+    return this._movement[1]
+  }
 
-    /**
-     * @type {String}
-     */
-    this.name = 'down'
+  /**
+   * @returns {Direction}
+   */
+  static up () {
+    return new Direction([0, -1], 'up')
+  }
+
+  /**
+   * @returns {Direction}
+   */
+  static down () {
+    return new Direction([0, 1], 'down')
+  }
+
+  /**
+   * @returns {Direction}
+   */
+  static left () {
+    return new Direction([-1, 0], 'left')
+  }
+
+  /**
+   * @returns {Direction}
+   */
+  static right () {
+    return new Direction([1, 0], 'right')
   }
 }

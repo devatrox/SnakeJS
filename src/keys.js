@@ -1,4 +1,4 @@
-import { Direction, DirectionLeft, DirectionRight, DirectionDown, DirectionUp } from './Direction.js'
+import Direction from './Direction.js'
 import Assert from './tools/Assert.js'
 
 export class Key {
@@ -25,14 +25,14 @@ export class EscapeKey extends Key {
 export class DirectionKey extends Key {
   /**
    * @param {String} keyName
-   * @param {Direction} direction
+   * @param {String} direction
    */
-  constructor (keyName, direction) {
+  constructor (keyName, direction = 'up') {
     super(keyName)
     /**
      * @type {Direction}
      */
-    this.direction = new direction()
+    this.direction = Direction[direction]()
   }
 
   /**
@@ -68,25 +68,25 @@ export class DirectionKey extends Key {
 
 export class Left extends DirectionKey {
   constructor (key) {
-    super(key, DirectionLeft)
+    super(key, 'left')
   }
 }
 
 export class Right extends DirectionKey {
   constructor (key) {
-    super(key, DirectionRight)
+    super(key, 'right')
   }
 }
 
 export class Up extends DirectionKey {
   constructor (key) {
-    super(key, DirectionUp)
+    super(key, 'up')
   }
 }
 
 export class Down extends DirectionKey {
   constructor (key) {
-    super(key, DirectionDown)
+    super(key, 'down')
   }
 }
 

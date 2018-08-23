@@ -6,7 +6,7 @@ import Grid from './Grid.js'
 import View from './View.js'
 import Coord from './coords/BaseCoord.js'
 import GridCoord from './coords/GridCoord.js'
-import { Direction, DirectionUp } from './Direction.js'
+import Direction from './Direction.js'
 import { SpriteSegment, EmptySprite, FoodSprite, SnakeSprite, SnakeHeadSprite, SnakeTailSprite, SnakeBodySprite, SnakeCurveSprite } from './sprite.js'
 import Player, { System } from './Player.js'
 
@@ -107,47 +107,40 @@ export class Entity extends Point {
 
   /**
    * @param {(Direction|GridCoord)} directionOrCoord
-   * @param {Boolean} [copy]
    *
    * @fires Game.Events.BUMP
    * @fires Game.Events.EAT_FOOD
    *
    * @returns {Entity}
+   * TODO: Something's not right
    */
-  move (directionOrCoord, copy) {
-    let coord
+  move (directionOrCoord) {
+    let direction = directionOrCoord
 
     if (directionOrCoord instanceof GridCoord) {
-      coord = directionOrCoord
-    } else {
-      let x = this.coord.x + directionOrCoord.movement[0]
-      let y = this.coord.y + directionOrCoord.movement[1]
-
-      // * If snake is out of bounds, come out of opposite side
-      if (x < 0) x = (this.grid.width - 1)
-      if (x > (this.grid.width - 1)) x = 0
-      if (y < 0) y = (this.grid.height - 1)
-      if (y > (this.grid.height - 1)) y = 0
-
-      coord = new GridCoord(x, y)
-      this.angle = directionOrCoord.name
-      console.log(this.angle)
+      direction = directionOrCoord.difference(this.coord)
     }
 
-    if (Entity.exists(coord) && Entity.isNotFood(coord)) {
+    let coord = this.coord.move(direction, GridCoord)
+    this.angle = direction.name
+    console.log(this.angle)
+
+    if (Entity.exists(coord) && !Entity.isFood(coord)) {
       Utils.emit(Game.Events.BUMP, {
         player: this.owner,
         entity: this.grid.get(coord)
       })
 
       return this
-    } else if (Config.gridInstance.get(coord) instanceof Food) {
+    } else if (Entity.isFood(coord)) {
       Utils.emit(Game.Events.EAT_FOOD, {
         player: this.owner
       })
     }
 
-    this.grid.move(this, coord, copy)
+    this.grid.move(this, coord)
+
+    this.coord = coord
 
     return this
   }
@@ -180,8 +173,8 @@ export class Entity extends Point {
    * @param {GridCoord} coord
    * @returns {Boolean}
    */
-  static isNotFood (coord) {
-    return !(Config.gridInstance.get(coord) instanceof Food)
+  static isFood (coord) {
+    return (Config.gridInstance.get(coord) instanceof Food)
   }
 }
 
@@ -252,14 +245,16 @@ export class SnakeCurve extends Entity {
   }
 }
 
-export class Snake extends Array {
+export class Snake {
   /**
    * @param {Player} owner
    * @param {GridCoord} [coord]
    */
   constructor (owner, coord) {
-    super(new SnakePiece(owner, coord))
-
+    /**
+     * @type {Entity[]}
+     */
+    this.list = [new SnakeHead('up', owner, coord)]
     /**
      * @type {Player}
      */
@@ -269,7 +264,7 @@ export class Snake extends Array {
      */
     this.maxSize = 2
 
-    this.move(new DirectionUp())
+    this.move(Direction.up())
   }
 
   /**
@@ -278,7 +273,7 @@ export class Snake extends Array {
    */
   add (item) {
     Assert.instance(item, Entity)
-    this.push(item)
+    this.list.push(item)
 
     this.rearrangeSprites()
 
@@ -289,32 +284,35 @@ export class Snake extends Array {
    * @returns {Entity}
    */
   get head () {
-    return _.head(this)
+    return _.head(this.list)
   }
 
   /**
    * @returns {Entity}
    */
   get tail () {
-    return _.last[this]
+    return _.last[this.list]
   }
 
   /**
    * @param {GridCoord|Direction} direction
    * @returns {Snake}
+   * TODO: Something's not right
    */
   move (direction) {
     let prevDirection = direction
     let prevAngle = this.head.angle
 
-    this.forEach((piece, i) => {
+    this.list = this.list.map((piece, i) => {
       let currentCoord = piece.coord
       let currentAngle = piece.angle
-      this[i].angle = prevAngle
-      console.log(prevAngle, piece.angle, this[i].angle)
-      this[i] = this[i].move(prevDirection)
+      piece.angle = prevAngle
+      console.log(prevAngle, piece.angle, piece.angle)
+      piece = piece.move(prevDirection)
       prevDirection = currentCoord
       prevAngle = currentAngle
+
+      return piece
     })
 
     if (this.maxSize > this.length) {
@@ -328,16 +326,16 @@ export class Snake extends Array {
   }
 
   rearrangeSprites () {
-    this.forEach((piece, i) => {
+    this.list.forEach((piece, i) => {
       switch (i) {
         case 0:
-          this[i] = new SnakeHead(piece.angle, piece.owner, piece.coord)
+          this.list[i] = new SnakeHead(piece.angle, piece.owner, piece.coord)
           break
         case this.length - 1:
-          this[i] = new SnakeTail(piece.angle, piece.owner, piece.coord)
+          this.list[i] = new SnakeTail(piece.angle, piece.owner, piece.coord)
           break
         default:
-          this[i] = new SnakeBody(piece.angle, piece.owner, piece.coord)
+          this.list[i] = new SnakeBody(piece.angle, piece.owner, piece.coord)
       }
     })
   }

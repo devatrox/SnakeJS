@@ -17,6 +17,7 @@ export default class GridCoord extends Coord {
     let x = _.random(saveArea, (Config.gridInstance.width - saveArea))
     let y = _.random(saveArea, (Config.gridInstance.height - saveArea))
     let coord = new GridCoord(x, y)
+
     if (Entity.exists(coord)) {
       return GridCoord.random()
     }

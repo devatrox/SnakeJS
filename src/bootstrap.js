@@ -26,7 +26,10 @@ export const Config = {
   canvasScale: 1,
   spriteScale: 10,
   spriteImagePath: './src/sprite.png',
-  spriteImage: new Sprite()
+  spriteImage: new Sprite(),
+  viewInstance: new View('game'),
+  gridInstance: new Grid(),
+  gameInstance: new Game()
 }
 
 export default class Bootstrap {
@@ -34,9 +37,7 @@ export default class Bootstrap {
    * @returns {Promise}
    */
   static async init () {
-    Config.viewInstance = new View('game')
-    Config.gridInstance = new Grid()
-    Config.gameInstance = new Game()
+    Config.viewInstance.draw()
     await Config.spriteImage.load(Config.spriteImagePath)
     await Config.gridInstance.createGrid()
     Config.gameInstance.food = new Food()
