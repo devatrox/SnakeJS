@@ -1,41 +1,41 @@
 export class Direction {
-  constructor (movement) {
-    /**
-     * @type {Number[]}
-     */
-    this.movement = movement
+  x: number
+  y: number
+
+  constructor (x: number, y: number) {
+    this.x = x
+    this.y = y
   }
 }
 
 export class DirectionLeft extends Direction {
   constructor () {
-    super([-1, 0])
+    super(-1, 0)
   }
 }
 
 export class DirectionRight extends Direction {
   constructor () {
-    super([1, 0])
+    super(1, 0)
   }
 }
 
 export class DirectionUp extends Direction {
   constructor () {
-    super([0, -1])
+    super(0, -1)
   }
 }
 
 export class DirectionDown extends Direction {
   constructor () {
-    super([0, 1])
+    super(0, 1)
   }
 }
 
 export class Key {
-  constructor (keyName) {
-    /**
-     * @type {String}
-     */
+  keyName: string
+
+  constructor (keyName: string) {
     this.keyName = keyName
   }
 }
@@ -53,64 +53,55 @@ export class EscapeKey extends Key {
 }
 
 export class DirectionKey extends Key {
-  /**
-   * @param {String} keyName
-   * @param {DirectionKey} opposite
-   * @param {Direction} direction
-   */
-  constructor (keyName, opposite, direction) {
+  direction: Direction
+  opposite: DirectionKey
+
+  constructor (keyName: string, opposite: DirectionKey, direction: Direction) {
     super(keyName)
-    /**
-     * @type {DirectionKey}
-     */
+
     this.opposite = opposite
-    /**
-     * @type {Direction}
-     */
     this.direction = new direction()
-  }
-
-  /**
-   * @param {DirectionKey} key
-   */
-  set opposite (key) {
-    this._opposite = key
-  }
-
-  /**
-   * @returns {DirectionKey}
-   */
-  get opposite () {
-    return this._opposite
   }
 }
 
 export class Left extends DirectionKey {
-  constructor (key) {
+  constructor (key: string) {
     super(key, Right, DirectionLeft)
   }
 }
 
 export class Right extends DirectionKey {
-  constructor (key) {
+  constructor (key: string) {
     super(key, Left, DirectionRight)
   }
 }
 
 export class Up extends DirectionKey {
-  constructor (key) {
+  constructor (key: string) {
     super(key, Down, DirectionUp)
   }
 }
 
 export class Down extends DirectionKey {
-  constructor (key) {
+  constructor (key: string) {
     super(key, Up, DirectionDown)
   }
 }
 
+type KeySetOptions = {
+  left: string,
+  right: string,
+  up: string,
+  down: string
+}
+
 export class KeySet {
-  constructor (options) {
+  left: Left
+  right: Right
+  up: Up
+  down: Down
+
+  constructor (options: KeySetOptions) {
     this.left = new Left(options.left)
     this.right = new Right(options.right)
     this.up = new Up(options.up)
@@ -122,28 +113,17 @@ export class KeySet {
     this.down.opposite = this.up
   }
 
-  /**
-   * @returns {DirectionKey[]}
-   */
-  getAll () {
+  getAll (): DirectionKey[] {
     return Object.values(this)
   }
 
-  /**
-   * @param {String} keyName
-   * @returns {DirectionKey}
-   */
-  get (keyName) {
+  get (keyName: string): DirectionKey {
     return this.getAll().filter(key => {
       return key.keyName === keyName
     })[0]
   }
 
-  /**
-   * @param {String} keyName
-   * @returns {Boolean}
-   */
-  has (keyName) {
+  has (keyName: string): boolean {
     return this.getAll().includes(this.get(keyName))
   }
 }
