@@ -2,7 +2,7 @@
 
 A simple game of Snake written in ES6 without any frameworks.
 
-As of right now, it does not have any UI besides showing the score and it looks ugly as shit but I made this to learn the basics of game development and I will continue improving this.
+As of right now, it does not have any UI besides showing the score and it looks ugly as shit but I made this to learn the basics of game development.
 
 ## How to play
 
